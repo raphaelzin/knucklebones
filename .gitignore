@@ -1,0 +1,4 @@
+# Ignore node package management artifacts
+**/node_modules/*
+
+.DS_Store
