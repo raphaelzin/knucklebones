@@ -1,11 +1,16 @@
-import express, { Request, Response } from "express";
-const app = express();
-const port = 3000;
+import { GameController } from "./models/GameController";
+import DefaultRules from "./models/rules/DefaultRules";
+import { createServer } from "http";
+import { GameRoom } from "./models/GameRoom";
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
+const httpServer = createServer((request, response) => {
+  console.log(new Date() + " Received request for " + request);
+  response.writeHead(404);
+  response.end();
 });
 
-app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
+httpServer.listen(8000, () => {
+  console.log("Nothing");
 });
+
+const room = new GameRoom(httpServer);

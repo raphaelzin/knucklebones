@@ -1,5 +1,3 @@
-import { Player } from "./board";
-
 export enum GameStateKind {
   Tie = "tie",
   Win = "win",
@@ -9,7 +7,7 @@ export enum GameStateKind {
 
 export interface Turn {
   kind: GameStateKind.Turn;
-  player: Player;
+  playerId: string;
   die: number;
 }
 
@@ -17,7 +15,7 @@ export interface Turn {
 
 export interface WinningFinish {
   kind: GameStateKind.Win;
-  winner: Player;
+  winnerId: string;
 }
 
 export interface TieFinish {

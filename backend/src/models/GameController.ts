@@ -1,4 +1,4 @@
-import { createBoardState, Game, getPlayer, Player, Rules } from "./game/board";
+import { createBoardState, Game, Rules } from "./game/board";
 import { GameState, GameStateKind } from "./game/states";
 import { GameEvent } from "./game/events";
 
@@ -6,8 +6,8 @@ export interface GameControllerInterface {
   gameState: GameState;
   game: Game;
 
-  isMyTurn(player: Player): boolean;
-  play(col: number, player: Player): void;
+  isMyTurn(playerId: string): boolean;
+  play(col: number, playerId: string): void;
   onEvent: (event: GameEvent) => void;
 }
 
@@ -33,30 +33,42 @@ export class GameController implements GameControllerInterface {
 
   enterGame(nickname: string, identifier: string) {
     const board: number[][] = [];
-    for (let i = 0; i < 5; i++) board.push([]);
+    for (let i = 0; i < this.game.rules.boardSize; i++) board.push([]);
 
     this.game.players.push({
       identifier: identifier,
       nickname: nickname,
       board: board,
     });
+
+    // TODO: make number of players variable
+    if (this.game.players.length == 2) {
+      this.gameState = {
+        boardState: createBoardState(this.game),
+        state: {
+          playerId: this.game.players[0].identifier,
+          die: this.throwDie(),
+          kind: GameStateKind.Turn,
+        },
+      };
+    }
   }
 
-  isMyTurn(player: Player): boolean {
+  isMyTurn(playerId: string): boolean {
     if (this.gameState.state.kind == GameStateKind.Turn) {
-      return this.gameState.state.player == player;
+      return this.gameState.state.playerId == playerId;
     }
     return false;
   }
 
-  play(col: number, player: Player) {
+  play(col: number, playerId: string) {
     if (this.gameState.state.kind != GameStateKind.Turn) {
       // <------ .error(not a turn)
       console.log("Not valid move");
       return;
     }
 
-    if (this.gameState.state.player.identifier != player.identifier) {
+    if (this.gameState.state.playerId != playerId) {
       // <------ .error(not your turn)
       console.log("It's not your turn");
       return;
@@ -65,7 +77,7 @@ export class GameController implements GameControllerInterface {
     const die = this.gameState.state.die;
 
     for (const player of this.game.players) {
-      if (player.identifier != player.identifier) {
+      if (player.identifier != playerId) {
         // Removes instances of die in that column of other players
         player.board[col] = player.board[col].filter((x) => x != die);
       } else {
@@ -87,7 +99,7 @@ export class GameController implements GameControllerInterface {
       boardState: createBoardState(this.game),
       state: {
         kind: GameStateKind.Turn,
-        player: this.nextPlayerAfter(player),
+        playerId: this.nextPlayerAfter(playerId),
         die: this.throwDie(),
       },
     };
@@ -119,7 +131,7 @@ export class GameController implements GameControllerInterface {
         boardState: createBoardState(this.game),
         state: {
           kind: GameStateKind.Win,
-          winner: getPlayer(winnerId, this.game),
+          winnerId: winnerId,
         },
       };
     }
@@ -129,10 +141,10 @@ export class GameController implements GameControllerInterface {
     return Math.floor(Math.random() * this.game.rules.dieCount) + 1;
   }
 
-  nextPlayerAfter(player: Player): Player {
+  nextPlayerAfter(playerId: string): string {
     const ids = this.game.players.map((p) => p.identifier);
-    const index = ids.indexOf(player.identifier);
+    const index = ids.indexOf(playerId);
     const id = ids[(index + 1) % ids.length];
-    return getPlayer(id, this.game);
+    return id;
   }
 }
