@@ -1,41 +1,55 @@
 import { GameController } from "./GameController";
 import DefaultRules from "./rules/DefaultRules";
-import {
-  server as WebSocketServer,
-  connection as WebSocketConnection,
-} from "websocket";
-import { Server } from "http";
 import { randomUUID } from "crypto";
+import { Socket } from "socket.io";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+
+type IOSocket = Socket<
+  DefaultEventsMap,
+  DefaultEventsMap,
+  DefaultEventsMap,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+>;
 
 interface GameRoomClient {
-  connection: WebSocketConnection;
+  socket: IOSocket;
   id: string;
 }
 
 export class GameRoom {
   controller: GameController;
-  websocketServer: WebSocketServer;
+  players: GameRoomClient[];
   clients: GameRoomClient[];
   code: string;
 
-  constructor(server: Server) {
+  constructor(code: string) {
+    this.code = code;
     this.controller = new GameController(DefaultRules);
-    this.websocketServer = new WebSocketServer({
-      httpServer: server,
-      autoAcceptConnections: false,
-    });
+
+    this.clients = [];
+    this.players = [];
   }
 
-  enterGame(nickname: string) {
+  enterGame(socket: IOSocket) {
     const id = randomUUID();
+    const client: GameRoomClient = {
+      id: id,
+      socket: socket,
+    };
 
-    // this.websocketServer.handleUpgrade()
-
-    this.websocketServer.on("request", (request) => {
-      const connection = request.accept(request.origin);
-      const client = { connection: connection, id: id };
-      this.clients.push(client);
-      this.controller.enterGame(nickname, randomUUID());
+    socket.on("event", (args) => {
+      this.handleEvents(id, "event", args);
+      socket.emit("event", `I got ${args}`);
     });
+
+    socket.emit("welcome", id);
+    this.clients.push(client);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handleEvents(clientId: string, channel: string, args: any) {
+    // Parse events from clients
+    console.log(clientId, channel, args);
   }
 }
