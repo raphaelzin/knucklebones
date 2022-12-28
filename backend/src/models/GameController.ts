@@ -40,8 +40,6 @@ export class GameController implements GameControllerInterface {
       board: board,
     });
 
-    console.log("Number of players: ", this.game.players.length);
-
     // Reached the number of players, start game.
     if (this.game.players.length == this.game.rules.numberOfPlayers) {
       this.gameState = this.createState(
@@ -59,7 +57,7 @@ export class GameController implements GameControllerInterface {
     const player = this.game.players.filter((p) => p.identifier == playerId)[0];
 
     // If the column is already full, throw error.
-    if (player.board[col].length >= this.game.rules.boardSize)
+    if (player.board[col].length >= this.game.rules.boardSize || col < 0)
       throw ColumnFullError;
 
     for (const player of this.game.players) {

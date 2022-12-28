@@ -26,8 +26,13 @@ export interface WaitingPlayer {
   kind: GameStateKind.WaitingPlayer;
 }
 
+export interface PlayerBoardState {
+  score: number;
+  board: number[][];
+}
+
 export interface BoardState {
-  players: { [key: string]: number[][] };
+  players: { [key: string]: PlayerBoardState };
 }
 
 export type FinishedState = WinningFinish | TieFinish;

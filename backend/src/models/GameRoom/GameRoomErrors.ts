@@ -1,7 +1,7 @@
 // Play Errors
 export type ErrorDomain = "game" | "game-room";
 
-interface GameError {
+export interface GameError {
   error: string;
   domain: ErrorDomain;
   debugMessage?: string;
@@ -30,4 +30,22 @@ export const InvalidColumn: GameError = {
   error: "invalid-column",
   domain: "game",
   message: "The selected column is not valid.",
+};
+
+export const FullHouseError: GameError = {
+  error: "full-house",
+  domain: "game",
+  message: "This game is already full. Consider entering as a spectator",
+};
+
+export const InvalidPayload = (
+  message: string,
+  debugMessage: string = undefined
+): GameError => {
+  return {
+    error: "invalid-payload",
+    domain: "game-room",
+    message,
+    debugMessage,
+  };
 };

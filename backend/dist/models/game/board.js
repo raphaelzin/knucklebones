@@ -4,7 +4,10 @@ exports.getPlayer = exports.createBoardState = void 0;
 function createBoardState(game) {
     const state = {};
     for (const player of game.players) {
-        state[player.identifier] = player.board;
+        state[player.identifier] = {
+            board: player.board,
+            score: game.rules.calculateScore(player.board),
+        };
     }
     return { players: state };
 }

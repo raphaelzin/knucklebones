@@ -1,4 +1,4 @@
-import { BoardState } from "./states";
+import { BoardState, PlayerBoardState } from "./states";
 
 export interface Player {
   identifier: string;
@@ -21,9 +21,12 @@ export interface Game {
 }
 
 export function createBoardState(game: Game): BoardState {
-  const state: { [key: string]: number[][] } = {};
+  const state: { [key: string]: PlayerBoardState } = {};
   for (const player of game.players) {
-    state[player.identifier] = player.board;
+    state[player.identifier] = {
+      board: player.board,
+      score: game.rules.calculateScore(player.board),
+    };
   }
 
   return { players: state };

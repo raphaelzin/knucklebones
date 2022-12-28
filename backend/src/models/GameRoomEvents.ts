@@ -1,11 +1,13 @@
 import { GameState } from "./game/states";
+import { GameError } from "./GameRoom/GameRoomErrors";
 
 export type GameRoomEventKind =
   | "welcome"
   | "connect"
   | "reconnect"
   | "game-event"
-  | "game-state-update";
+  | "game-state-update"
+  | "error";
 
 /**
  * Server event sent to client with their secret id.
@@ -46,7 +48,13 @@ export interface StateUpdateEvent {
   state: GameState;
 }
 
+export interface ErrorEvent {
+  kind: GameRoomEventKind;
+  error: GameError;
+}
+
 export type ServerEvent =
   | ReconnectResponseEvent
   | WelcomeEvent
-  | StateUpdateEvent;
+  | StateUpdateEvent
+  | ErrorEvent;

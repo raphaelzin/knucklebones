@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const socket_io_1 = require("socket.io");
 const express_1 = __importDefault(require("express"));
-const GameRoom_1 = require("../models/GameRoom");
+const GameRoom_1 = require("../models/GameRoom/GameRoom");
 exports.router = express_1.default.Router();
 exports.router.use(express_1.default.json());
 const rooms = [];

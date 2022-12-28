@@ -6,6 +6,7 @@ import { Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ServerEvent } from "../GameRoomEvents";
 import { GameState } from "../game/states";
+import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
 
 type IOSocket = Socket<
   DefaultEventsMap,
@@ -51,8 +52,9 @@ export class GameRoom {
 
     // if room is full, throw error so router can close socket.
     if (this.controller.gameIsFull()) {
-      // TODO: Replace with a typed error
-      throw "Game is full, consider entering as spectator";
+      this.emit(socket, { kind: "error", error: FullHouseError });
+      socket.disconnect(true);
+      return;
     }
 
     const id = randomUUID();
@@ -70,7 +72,6 @@ export class GameRoom {
     const client: GameRoomClient = { id, socket };
 
     this.emit(socket, { kind: "welcome", id });
-
     this.spectators.push(client);
   }
 
@@ -92,12 +93,17 @@ export class GameRoom {
 
   handlePlay(socket: IOSocket, payload: any) {
     const { column, playerId } = payload;
-    if (!column || !playerId) {
-      // TODO: send socket message.
-      console.log("error, invalid payload");
-
+    if (column === undefined || !playerId) {
+      this.emit(socket, {
+        kind: "error",
+        error: InvalidPayload(
+          "Invalid or missing Column or Player id",
+          payload
+        ),
+      });
       return;
     }
+
     try {
       this.controller.play(column, playerId);
     } catch (e) {
@@ -107,7 +113,6 @@ export class GameRoom {
 
   handleReconnectRequest(socket: IOSocket, id: string) {
     const playerReconnectingId = id;
-
     const player = this.players.filter(
       (player) => player.id == playerReconnectingId
     )[0];
@@ -132,13 +137,11 @@ export class GameRoom {
   }
 
   emit(socket: IOSocket, event: ServerEvent) {
-    console.log(`emitting event to ${socket.conn}: ${event.kind}`);
+    console.log(`Emitting "${event}" to "${socket.id}"`);
     socket.emit(event.kind, event);
   }
 
   handleGameStateChange(state: GameState) {
-    console.log(state);
-
     for (const client of [...this.players, ...this.spectators]) {
       this.emit(client.socket, { kind: "game-state-update", state });
     }
