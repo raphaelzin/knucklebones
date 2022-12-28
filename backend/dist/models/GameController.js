@@ -25,6 +25,7 @@ class GameController {
             nickname: nickname,
             board: board,
         });
+        console.log("Number of players: ", this.game.players.length);
         // TODO: make number of players variable
         if (this.game.players.length == 2) {
             this.gameState = {
@@ -35,7 +36,11 @@ class GameController {
                     kind: states_1.GameStateKind.Turn,
                 },
             };
+            this.gameStateCallback(this.gameState);
         }
+    }
+    gameIsFull() {
+        return this.game.players.length == this.game.rules.numberOfPlayers;
     }
     isMyTurn(playerId) {
         if (this.gameState.state.kind == states_1.GameStateKind.Turn) {
@@ -80,7 +85,7 @@ class GameController {
                 die: this.throwDie(),
             },
         };
-        // <-- Publish new state
+        this.gameStateCallback(this.gameState);
     }
     finishGame() {
         let bestScore = -1;
@@ -110,6 +115,7 @@ class GameController {
                 },
             };
         }
+        this.gameStateCallback(this.gameState);
     }
     throwDie() {
         return Math.floor(Math.random() * this.game.rules.dieCount) + 1;

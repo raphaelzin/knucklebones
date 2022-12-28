@@ -5,7 +5,10 @@ import { GameEvent } from "./game/events";
 export interface GameControllerInterface {
   gameState: GameState;
   game: Game;
+  gameStateCallback: (state: GameState) => void;
 
+  enterGame(nickname: string, identifier: string);
+  gameIsFull(): boolean;
   isMyTurn(playerId: string): boolean;
   play(col: number, playerId: string): void;
   onEvent: (event: GameEvent) => void;
@@ -14,6 +17,7 @@ export interface GameControllerInterface {
 export class GameController implements GameControllerInterface {
   gameState: GameState;
   game: Game;
+  gameStateCallback: (event: GameState) => void;
 
   onEvent: (event: GameEvent) => void;
 
@@ -41,6 +45,7 @@ export class GameController implements GameControllerInterface {
       board: board,
     });
 
+    console.log("Number of players: ", this.game.players.length);
     // TODO: make number of players variable
     if (this.game.players.length == 2) {
       this.gameState = {
@@ -51,7 +56,12 @@ export class GameController implements GameControllerInterface {
           kind: GameStateKind.Turn,
         },
       };
+      this.gameStateCallback(this.gameState);
     }
+  }
+
+  gameIsFull(): boolean {
+    return this.game.players.length == this.game.rules.numberOfPlayers;
   }
 
   isMyTurn(playerId: string): boolean {
@@ -104,7 +114,7 @@ export class GameController implements GameControllerInterface {
       },
     };
 
-    // <-- Publish new state
+    this.gameStateCallback(this.gameState);
   }
 
   finishGame() {
@@ -135,6 +145,7 @@ export class GameController implements GameControllerInterface {
         },
       };
     }
+    this.gameStateCallback(this.gameState);
   }
 
   throwDie(): number {

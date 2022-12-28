@@ -3,6 +3,7 @@ import { Game, Rules } from "../game/board";
 class DefaultRules implements Rules {
   dieCount = 6;
   boardSize = 3;
+  numberOfPlayers = 2;
 
   evaluateGameEnd(game: Game): boolean {
     const boards = game.players.map((p) => p.board);

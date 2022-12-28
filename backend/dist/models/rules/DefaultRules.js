@@ -4,6 +4,7 @@ class DefaultRules {
     constructor() {
         this.dieCount = 6;
         this.boardSize = 3;
+        this.numberOfPlayers = 2;
     }
     evaluateGameEnd(game) {
         const boards = game.players.map((p) => p.board);
