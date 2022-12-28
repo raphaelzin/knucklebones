@@ -46,10 +46,6 @@ export interface StateUpdateEvent {
   state: GameState;
 }
 
-// export interface Error {
-//   kind
-// }
-
 export type ServerEvent =
   | ReconnectResponseEvent
   | WelcomeEvent

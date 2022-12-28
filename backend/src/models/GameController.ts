@@ -1,6 +1,10 @@
 import { createBoardState, Game, Rules } from "./game/board";
-import { GameState, GameStateKind } from "./game/states";
-import { GameEvent } from "./game/events";
+import { GameState, GameStateKind, PlayState, Turn } from "./game/states";
+import {
+  ColumnFullError,
+  InvalidMoveError,
+  WrongTurnError,
+} from "./GameRoom/GameRoomErrors";
 
 export interface GameControllerInterface {
   gameState: GameState;
@@ -9,9 +13,7 @@ export interface GameControllerInterface {
 
   enterGame(nickname: string, identifier: string);
   gameIsFull(): boolean;
-  isMyTurn(playerId: string): boolean;
   play(col: number, playerId: string): void;
-  onEvent: (event: GameEvent) => void;
 }
 
 export class GameController implements GameControllerInterface {
@@ -19,20 +21,13 @@ export class GameController implements GameControllerInterface {
   game: Game;
   gameStateCallback: (event: GameState) => void;
 
-  onEvent: (event: GameEvent) => void;
-
   constructor(rules: Rules) {
-    this.game = {
-      rules: rules,
-      players: [],
-    };
+    this.game = { rules: rules, players: [] };
+    this.gameState = this.createState({ kind: GameStateKind.WaitingPlayer });
+  }
 
-    this.gameState = {
-      boardState: createBoardState(this.game),
-      state: {
-        kind: GameStateKind.WaitingPlayer,
-      },
-    };
+  gameIsFull(): boolean {
+    return this.game.players.length == this.game.rules.numberOfPlayers;
   }
 
   enterGame(nickname: string, identifier: string) {
@@ -46,45 +41,26 @@ export class GameController implements GameControllerInterface {
     });
 
     console.log("Number of players: ", this.game.players.length);
-    // TODO: make number of players variable
-    if (this.game.players.length == 2) {
-      this.gameState = {
-        boardState: createBoardState(this.game),
-        state: {
-          playerId: this.game.players[0].identifier,
-          die: this.throwDie(),
-          kind: GameStateKind.Turn,
-        },
-      };
+
+    // Reached the number of players, start game.
+    if (this.game.players.length == this.game.rules.numberOfPlayers) {
+      this.gameState = this.createState(
+        this.createNextTurn(this.game.players[0].identifier)
+      );
       this.gameStateCallback(this.gameState);
     }
   }
 
-  gameIsFull(): boolean {
-    return this.game.players.length == this.game.rules.numberOfPlayers;
-  }
-
-  isMyTurn(playerId: string): boolean {
-    if (this.gameState.state.kind == GameStateKind.Turn) {
-      return this.gameState.state.playerId == playerId;
-    }
-    return false;
-  }
-
   play(col: number, playerId: string) {
-    if (this.gameState.state.kind != GameStateKind.Turn) {
-      // <------ .error(not a turn)
-      console.log("Not valid move");
-      return;
-    }
-
-    if (this.gameState.state.playerId != playerId) {
-      // <------ .error(not your turn)
-      console.log("It's not your turn");
-      return;
-    }
+    if (this.gameState.state.kind != GameStateKind.Turn) throw InvalidMoveError;
+    if (this.gameState.state.playerId != playerId) throw WrongTurnError;
 
     const die = this.gameState.state.die;
+    const player = this.game.players.filter((p) => p.identifier == playerId)[0];
+
+    // If the column is already full, throw error.
+    if (player.board[col].length >= this.game.rules.boardSize)
+      throw ColumnFullError;
 
     for (const player of this.game.players) {
       if (player.identifier != playerId) {
@@ -96,24 +72,13 @@ export class GameController implements GameControllerInterface {
       }
     }
 
-    // publish play to players
-    // <--
-
     // Finish game if applicable
     if (this.game.rules.evaluateGameEnd(this.game)) {
       this.finishGame();
       return;
     }
 
-    this.gameState = {
-      boardState: createBoardState(this.game),
-      state: {
-        kind: GameStateKind.Turn,
-        playerId: this.nextPlayerAfter(playerId),
-        die: this.throwDie(),
-      },
-    };
-
+    this.gameState = this.createState(this.createNextTurn(playerId));
     this.gameStateCallback(this.gameState);
   }
 
@@ -132,21 +97,15 @@ export class GameController implements GameControllerInterface {
     }
 
     if (!winnerId) {
-      this.gameState = {
-        boardState: createBoardState(this.game),
-        state: { kind: GameStateKind.Tie },
-      };
+      this.gameState = this.createState({ kind: GameStateKind.Tie });
     } else {
-      this.gameState = {
-        boardState: createBoardState(this.game),
-        state: {
-          kind: GameStateKind.Win,
-          winnerId: winnerId,
-        },
-      };
+      this.gameState = this.createState({ kind: GameStateKind.Win, winnerId });
     }
+
     this.gameStateCallback(this.gameState);
   }
+
+  // Helper functions
 
   throwDie(): number {
     return Math.floor(Math.random() * this.game.rules.dieCount) + 1;
@@ -157,5 +116,20 @@ export class GameController implements GameControllerInterface {
     const index = ids.indexOf(playerId);
     const id = ids[(index + 1) % ids.length];
     return id;
+  }
+
+  createNextTurn(previousPlayer: string): Turn {
+    return {
+      kind: GameStateKind.Turn,
+      playerId: this.nextPlayerAfter(previousPlayer),
+      die: this.throwDie(),
+    };
+  }
+
+  createState(state: PlayState): GameState {
+    return {
+      boardState: createBoardState(this.game),
+      state: state,
+    };
   }
 }

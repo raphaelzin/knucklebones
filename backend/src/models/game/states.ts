@@ -32,7 +32,9 @@ export interface BoardState {
 
 export type FinishedState = WinningFinish | TieFinish;
 
+export type PlayState = Turn | FinishedState | WaitingPlayer;
+
 export interface GameState {
   boardState: BoardState;
-  state: Turn | FinishedState | WaitingPlayer;
+  state: PlayState;
 }

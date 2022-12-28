@@ -6,7 +6,6 @@ import { Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ServerEvent } from "../GameRoomEvents";
 import { GameState } from "../game/states";
-import { Client } from "socket.io/dist/client";
 
 type IOSocket = Socket<
   DefaultEventsMap,
@@ -99,7 +98,11 @@ export class GameRoom {
 
       return;
     }
-    this.controller.play(column, playerId);
+    try {
+      this.controller.play(column, playerId);
+    } catch (e) {
+      this.emit(socket, e);
+    }
   }
 
   handleReconnectRequest(socket: IOSocket, id: string) {

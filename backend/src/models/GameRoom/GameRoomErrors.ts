@@ -20,6 +20,12 @@ export const WrongTurnError: GameError = {
   message: "It is not your turn.",
 };
 
+export const InvalidMoveError: GameError = {
+  error: "invalid-move",
+  domain: "game",
+  message: "This is an invalid play",
+};
+
 export const InvalidColumn: GameError = {
   error: "invalid-column",
   domain: "game",
