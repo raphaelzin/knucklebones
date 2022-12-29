@@ -20,8 +20,6 @@ interface GameRoomClient {
   id: string;
 }
 
-export type ClientType = "player" | "spectator";
-
 export class GameRoom {
   controller: GameControllerInterface;
   players: GameRoomClient[];
@@ -76,16 +74,6 @@ export class GameRoom {
   }
 
   setupListeners(socket: IOSocket) {
-    socket.on("event", (args) => {
-      socket.emit("event", `I got ${args}`);
-    });
-
-    socket.on("game-event", (payload) => {
-      this.handlePlay(socket, payload);
-    });
-  }
-
-  setupSpectatorListeners(socket: IOSocket) {
     socket.on("game-event", (payload) => {
       this.handlePlay(socket, payload);
     });
@@ -106,8 +94,8 @@ export class GameRoom {
 
     try {
       this.controller.play(column, playerId);
-    } catch (e) {
-      this.emit(socket, e);
+    } catch (error) {
+      this.emit(socket, { kind: "error", error });
     }
   }
 
@@ -129,6 +117,7 @@ export class GameRoom {
     player.socket = socket;
 
     // Confirm reconnection.
+    this.setupListeners(socket);
     this.emit(socket, { kind: "reconnect", success: true });
     this.emit(socket, {
       kind: "game-state-update",
@@ -137,7 +126,6 @@ export class GameRoom {
   }
 
   emit(socket: IOSocket, event: ServerEvent) {
-    console.log(`Emitting "${event}" to "${socket.id}"`);
     socket.emit(event.kind, event);
   }
 

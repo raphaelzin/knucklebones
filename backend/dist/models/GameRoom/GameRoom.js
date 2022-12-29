@@ -45,14 +45,6 @@ class GameRoom {
         this.spectators.push(client);
     }
     setupListeners(socket) {
-        socket.on("event", (args) => {
-            socket.emit("event", `I got ${args}`);
-        });
-        socket.on("game-event", (payload) => {
-            this.handlePlay(socket, payload);
-        });
-    }
-    setupSpectatorListeners(socket) {
         socket.on("game-event", (payload) => {
             this.handlePlay(socket, payload);
         });
@@ -69,8 +61,8 @@ class GameRoom {
         try {
             this.controller.play(column, playerId);
         }
-        catch (e) {
-            this.emit(socket, e);
+        catch (error) {
+            this.emit(socket, { kind: "error", error });
         }
     }
     handleReconnectRequest(socket, id) {
@@ -87,6 +79,7 @@ class GameRoom {
         // Replaces socket with new one.
         player.socket = socket;
         // Confirm reconnection.
+        this.setupListeners(socket);
         this.emit(socket, { kind: "reconnect", success: true });
         this.emit(socket, {
             kind: "game-state-update",
@@ -94,7 +87,7 @@ class GameRoom {
         });
     }
     emit(socket, event) {
-        console.log(`Emitting "${event}" to "${socket.id}"`);
+        console.log(`Emitting "${JSON.stringify(event)}" to "${socket.id}"`);
         socket.emit(event.kind, event);
     }
     handleGameStateChange(state) {
