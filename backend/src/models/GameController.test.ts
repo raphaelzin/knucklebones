@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect, describe, test } from "@jest/globals";
-import exp from "constants";
 import { DiceTowerInterface } from "./game/DiceTower";
 import { GameState, GameStateKind } from "./game/states";
 import { GameController } from "./GameController";
