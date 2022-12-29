@@ -1,5 +1,7 @@
 import { createBoardState, Game, Rules } from "./game/board";
+import DiceTower, { DiceTowerInterface } from "./game/DiceTower";
 import { GameState, GameStateKind, PlayState, Turn } from "./game/states";
+
 import {
   ColumnFullError,
   InvalidMoveError,
@@ -20,8 +22,10 @@ export class GameController implements GameControllerInterface {
   gameState: GameState;
   game: Game;
   gameStateCallback: (event: GameState) => void;
+  diceTower: DiceTowerInterface;
 
-  constructor(rules: Rules) {
+  constructor(rules: Rules, diceTower: DiceTowerInterface = DiceTower) {
+    this.diceTower = diceTower;
     this.game = { rules: rules, players: [] };
     this.gameState = this.createState({ kind: GameStateKind.WaitingPlayer });
   }
@@ -105,10 +109,6 @@ export class GameController implements GameControllerInterface {
 
   // Helper functions
 
-  throwDie(): number {
-    return Math.floor(Math.random() * this.game.rules.dieCount) + 1;
-  }
-
   nextPlayerAfter(playerId: string): string {
     const ids = this.game.players.map((p) => p.identifier);
     const index = ids.indexOf(playerId);
@@ -120,7 +120,7 @@ export class GameController implements GameControllerInterface {
     return {
       kind: GameStateKind.Turn,
       playerId: this.nextPlayerAfter(previousPlayer),
-      die: this.throwDie(),
+      die: this.diceTower.throwDice(1, this.game.rules.dieCount),
     };
   }
 
