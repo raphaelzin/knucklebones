@@ -25,7 +25,7 @@ router.post("/create-game", async (req: Request, res: Response) => {
 const io = new WebSocketServer(4444);
 
 io.of("/game/play").on("connection", (socket) => {
-  const { roomCode, nickname, id } = socket.handshake.query;
+  const { roomCode, nickname, token } = socket.handshake.query;
 
   if (!roomCode || !nickname) {
     socket.emit("bye-bye", "Room code or nickname missing.");
@@ -41,7 +41,7 @@ io.of("/game/play").on("connection", (socket) => {
   }
 
   try {
-    room.enterGame(socket, nickname as string, id as string | undefined);
+    room.enterGame(socket, nickname as string, token as string | undefined);
   } catch (error) {
     socket.emit("bye-bye", error);
     socket.disconnect(true);

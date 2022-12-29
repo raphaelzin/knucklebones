@@ -11,9 +11,9 @@ import {
 export interface GameControllerInterface {
   gameState: GameState;
   game: Game;
-  gameStateCallback: (state: GameState) => void;
+  gameStateCallback?: (state: GameState) => void;
 
-  enterGame(nickname: string, identifier: string);
+  enterGame(nickname: string, identifier: string): void;
   gameIsFull(): boolean;
   play(col: number, playerId: string): void;
 }
@@ -21,7 +21,7 @@ export interface GameControllerInterface {
 export class GameController implements GameControllerInterface {
   gameState: GameState;
   game: Game;
-  gameStateCallback: (event: GameState) => void;
+  gameStateCallback?: (event: GameState) => void = undefined;
   diceTower: DiceTowerInterface;
 
   constructor(rules: Rules, diceTower: DiceTowerInterface = DiceTower) {

@@ -15,6 +15,7 @@ export type GameRoomEventKind =
 export interface WelcomeEvent {
   kind: GameRoomEventKind;
   id: string;
+  token: string;
 }
 
 /**

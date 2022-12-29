@@ -1,4 +1,8 @@
 # Ignore node package management artifacts
 **/node_modules/*
 
+.parcel-cache
+**/build/*
+**/dist/*
+
 .DS_Store

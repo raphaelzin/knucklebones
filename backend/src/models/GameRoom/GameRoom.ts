@@ -17,6 +17,7 @@ type IOSocket = Socket<
 
 interface GameRoomClient {
   socket: IOSocket;
+  token: string;
   id: string;
 }
 
@@ -56,9 +57,10 @@ export class GameRoom {
     }
 
     const id = randomUUID();
-    const client: GameRoomClient = { id, socket };
-
-    this.emit(socket, { kind: "welcome", id });
+    const token = randomUUID();
+    const client: GameRoomClient = { id, socket, token };
+    console.log(`token: ${token}`);
+    this.emit(socket, { kind: "welcome", id, token });
     this.setupListeners(socket);
 
     this.players.push(client);
@@ -67,9 +69,10 @@ export class GameRoom {
 
   spectateGame(socket: IOSocket) {
     const id = randomUUID();
-    const client: GameRoomClient = { id, socket };
+    const token = randomUUID();
+    const client: GameRoomClient = { id, socket, token };
 
-    this.emit(socket, { kind: "welcome", id });
+    this.emit(socket, { kind: "welcome", id, token });
     this.spectators.push(client);
   }
 
@@ -80,14 +83,14 @@ export class GameRoom {
   }
 
   handlePlay(socket: IOSocket, payload: any) {
-    const { column, playerId } = payload;
+    const { column, token } = payload;
+
+    const playerId = this.players.filter((p) => p.token == token)[0].id;
+
     if (column === undefined || !playerId) {
       this.emit(socket, {
         kind: "error",
-        error: InvalidPayload(
-          "Invalid or missing Column or Player id",
-          payload
-        ),
+        error: InvalidPayload("Invalid or missing Column or token", payload),
       });
       return;
     }
@@ -99,8 +102,9 @@ export class GameRoom {
     }
   }
 
-  handleReconnectRequest(socket: IOSocket, id: string) {
-    const playerReconnectingId = id;
+  handleReconnectRequest(socket: IOSocket, token: string) {
+    const playerReconnectingId = this.players.filter((p) => p.token == token)[0]
+      .id;
     const player = this.players.filter(
       (player) => player.id == playerReconnectingId
     )[0];
@@ -108,7 +112,7 @@ export class GameRoom {
       this.emit(socket, {
         kind: "reconnect",
         success: false,
-        error: `No player with id "${playerReconnectingId}" in this room.`,
+        error: `No player with token "${token}" in this room.`,
       });
       return;
     }
