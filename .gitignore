@@ -1,5 +1,6 @@
 # Ignore node package management artifacts
 **/node_modules/*
+**/.yarn/*
 
 .parcel-cache
 **/build/*

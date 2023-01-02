@@ -27,7 +27,7 @@ function $d4043330dc9cb8c3$export$cae4205f9169b2e9(id, game) {
 
 class $9c65ea2d50b878f6$var$DiceTower {
     throwDice(diceCount, sides) {
-        return Math.floor(Math.random() * sides * (diceCount - 1)) + 1 + diceCount;
+        return Math.floor(Math.random() * sides * diceCount) + 1;
     }
 }
 var $9c65ea2d50b878f6$export$2e2bcd8739ae039 = new $9c65ea2d50b878f6$var$DiceTower();
@@ -269,8 +269,8 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
     }
     handlePlay(socket, payload) {
         const { column: column , token: token  } = payload;
-        const playerId = this.players.filter((p)=>p.token == token)[0].id;
-        if (column === undefined || !playerId) {
+        const player = this.players.filter((p)=>p.token == token)[0];
+        if (column === undefined || !player) {
             this.emit(socket, {
                 kind: "error",
                 error: (0, $adcca57938cc80af$export$18a9427d80c1a057)("Invalid or missing Column or token", payload)
@@ -278,7 +278,7 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
             return;
         }
         try {
-            this.controller.play(column, playerId);
+            this.controller.play(column, player.id);
         } catch (error) {
             this.emit(socket, {
                 kind: "error",
@@ -287,8 +287,7 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
         }
     }
     handleReconnectRequest(socket, token) {
-        const playerReconnectingId = this.players.filter((p)=>p.token == token)[0].id;
-        const player = this.players.filter((player)=>player.id == playerReconnectingId)[0];
+        const player = this.players.filter((p)=>p.token == token)[0];
         if (!player) {
             this.emit(socket, {
                 kind: "reconnect",
@@ -303,7 +302,8 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
         this.setupListeners(socket);
         this.emit(socket, {
             kind: "reconnect",
-            success: true
+            success: true,
+            id: player.id
         });
         this.emit(socket, {
             kind: "game-state-update",
@@ -327,8 +327,10 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
 
 const $385422aa0e335287$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($ek9MX$express))).Router();
 $385422aa0e335287$export$5375cda95f0b0eb4.use((0, ($parcel$interopDefault($ek9MX$express))).json());
-const $385422aa0e335287$var$rooms = [];
-let $385422aa0e335287$var$counter = 0;
+const $385422aa0e335287$var$rooms = [
+    new (0, $ab3d57682f792e68$export$ddffd877baf3c775)("0")
+];
+let $385422aa0e335287$var$counter = 1;
 $385422aa0e335287$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
     if (!req.params) {
         res.statusCode = 404;
@@ -340,7 +342,11 @@ $385422aa0e335287$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=
     res.statusCode = 200;
     res.send(`${newRoomCode} :)`);
 });
-const $385422aa0e335287$var$io = new (0, $ek9MX$socketio.Server)(4444);
+const $385422aa0e335287$var$io = new (0, $ek9MX$socketio.Server)(4444, {
+    cors: {
+        origin: "http://localhost:3000"
+    }
+});
 $385422aa0e335287$var$io.of("/game/play").on("connection", (socket)=>{
     const { roomCode: roomCode , nickname: nickname , token: token  } = socket.handshake.query;
     if (!roomCode || !nickname) {
@@ -357,7 +363,7 @@ $385422aa0e335287$var$io.of("/game/play").on("connection", (socket)=>{
     try {
         room.enterGame(socket, nickname, token);
     } catch (error) {
-        socket.emit("bye-bye", error);
+        socket.emit("bye-bye", `an error: ${error}`);
         socket.disconnect(true);
     }
 });

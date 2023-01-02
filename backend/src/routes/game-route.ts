@@ -5,8 +5,8 @@ import { GameRoom } from "../models/GameRoom/GameRoom";
 export const router = express.Router();
 router.use(express.json());
 
-const rooms: GameRoom[] = [];
-let counter = 0;
+const rooms: GameRoom[] = [new GameRoom("0")];
+let counter = 1;
 
 router.post("/create-game", async (req: Request, res: Response) => {
   if (!req.params) {
@@ -22,7 +22,11 @@ router.post("/create-game", async (req: Request, res: Response) => {
   res.send(`${newRoomCode} :)`);
 });
 
-const io = new WebSocketServer(4444);
+const io = new WebSocketServer(4444, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 
 io.of("/game/play").on("connection", (socket) => {
   const { roomCode, nickname, token } = socket.handshake.query;
@@ -43,7 +47,7 @@ io.of("/game/play").on("connection", (socket) => {
   try {
     room.enterGame(socket, nickname as string, token as string | undefined);
   } catch (error) {
-    socket.emit("bye-bye", error);
+    socket.emit("bye-bye", `an error: ${error}`);
     socket.disconnect(true);
   }
 });

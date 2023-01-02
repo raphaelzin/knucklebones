@@ -85,9 +85,9 @@ export class GameRoom {
   handlePlay(socket: IOSocket, payload: any) {
     const { column, token } = payload;
 
-    const playerId = this.players.filter((p) => p.token == token)[0].id;
+    const player = this.players.filter((p) => p.token == token)[0];
 
-    if (column === undefined || !playerId) {
+    if (column === undefined || !player) {
       this.emit(socket, {
         kind: "error",
         error: InvalidPayload("Invalid or missing Column or token", payload),
@@ -96,18 +96,14 @@ export class GameRoom {
     }
 
     try {
-      this.controller.play(column, playerId);
+      this.controller.play(column, player.id);
     } catch (error) {
       this.emit(socket, { kind: "error", error });
     }
   }
 
   handleReconnectRequest(socket: IOSocket, token: string) {
-    const playerReconnectingId = this.players.filter((p) => p.token == token)[0]
-      .id;
-    const player = this.players.filter(
-      (player) => player.id == playerReconnectingId
-    )[0];
+    const player = this.players.filter((p) => p.token == token)[0];
     if (!player) {
       this.emit(socket, {
         kind: "reconnect",
@@ -122,7 +118,7 @@ export class GameRoom {
 
     // Confirm reconnection.
     this.setupListeners(socket);
-    this.emit(socket, { kind: "reconnect", success: true });
+    this.emit(socket, { kind: "reconnect", success: true, id: player.id });
     this.emit(socket, {
       kind: "game-state-update",
       state: this.controller.gameState,

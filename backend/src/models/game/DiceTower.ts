@@ -4,7 +4,7 @@ export interface DiceTowerInterface {
 
 class DiceTower implements DiceTowerInterface {
   throwDice(diceCount: number, sides: number): number {
-    return Math.floor(Math.random() * sides * (diceCount - 1)) + 1 + diceCount;
+    return Math.floor(Math.random() * sides * diceCount) + 1;
   }
 }
 

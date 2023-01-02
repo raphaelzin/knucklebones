@@ -19,7 +19,7 @@ class RiggedDice implements DiceTowerInterface {
 
 const diceTower = new RiggedDice();
 const controller = new GameController(DefaultRules, diceTower);
-const stateListener = (state: GameState) => {
+const stateListener = (_state: GameState) => {
   return;
 };
 
