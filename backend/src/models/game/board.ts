@@ -24,6 +24,7 @@ export function createBoardState(game: Game): BoardState {
   const state: { [key: string]: PlayerBoardState } = {};
   for (const player of game.players) {
     state[player.identifier] = {
+      nickname: player.nickname,
       board: player.board,
       score: game.rules.calculateScore(player.board),
     };

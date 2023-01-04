@@ -27,6 +27,7 @@ export interface WaitingPlayer {
 }
 
 export interface PlayerBoardState {
+  nickname: string;
   score: number;
   board: number[][];
 }

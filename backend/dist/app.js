@@ -10,6 +10,7 @@ function $parcel$interopDefault(a) {
 /* eslint-disable @typescript-eslint/no-explicit-any */ function $d4043330dc9cb8c3$export$89afb3b1226ef1c9(game) {
     const state = {};
     for (const player of game.players)state[player.identifier] = {
+        nickname: player.nickname,
         board: player.board,
         score: game.rules.calculateScore(player.board)
     };
