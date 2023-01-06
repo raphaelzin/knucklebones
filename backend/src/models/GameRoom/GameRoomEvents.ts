@@ -1,5 +1,5 @@
-import { GameState } from "./game/states";
-import { GameError } from "./GameRoom/GameRoomErrors";
+import { GameStateSummary } from "../game/states";
+import { GameError } from "./GameRoomErrors";
 
 export type GameRoomEventKind =
   | "welcome"
@@ -46,7 +46,7 @@ export interface PlayRoomEvent {
 
 export interface StateUpdateEvent {
   kind: GameRoomEventKind;
-  state: GameState;
+  state: GameStateSummary;
 }
 
 export interface ErrorEvent {

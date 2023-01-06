@@ -1,18 +1,10 @@
+import { Rules } from "../rules/Rules";
 import { BoardState, PlayerBoardState } from "./states";
 
 export interface Player {
   identifier: string;
   nickname: string;
   board: number[][];
-}
-
-export interface Rules {
-  dieCount: number;
-  boardSize: number;
-  numberOfPlayers: number;
-
-  calculateScore(board: number[][]): number;
-  evaluateGameEnd(game: Game): boolean;
 }
 
 export interface Game {

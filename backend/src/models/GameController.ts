@@ -1,6 +1,7 @@
-import { createBoardState, Game, Rules } from "./game/board";
+import { createBoardState, Game } from "./game/Game";
+import { Rules } from "./rules/Rules";
 import DiceTower, { DiceTowerInterface } from "./game/DiceTower";
-import { GameState, GameStateKind, PlayState, Turn } from "./game/states";
+import { GameStateSummary, GameState, Turn } from "./game/states";
 
 import {
   ColumnFullError,
@@ -9,9 +10,9 @@ import {
 } from "./GameRoom/GameRoomErrors";
 
 export interface GameControllerInterface {
-  gameState: GameState;
+  gameStateSummary: GameStateSummary;
   game: Game;
-  gameStateCallback?: (state: GameState) => void;
+  gameStateCallback?: (state: GameStateSummary) => void;
 
   enterGame(nickname: string, identifier: string): void;
   gameIsFull(): boolean;
@@ -19,15 +20,17 @@ export interface GameControllerInterface {
 }
 
 export class GameController implements GameControllerInterface {
-  gameState: GameState;
+  gameStateSummary: GameStateSummary;
   game: Game;
-  gameStateCallback?: (event: GameState) => void = undefined;
+  gameStateCallback?: (event: GameStateSummary) => void = undefined;
   diceTower: DiceTowerInterface;
 
   constructor(rules: Rules, diceTower: DiceTowerInterface = DiceTower) {
     this.diceTower = diceTower;
     this.game = { rules: rules, players: [] };
-    this.gameState = this.createState({ kind: GameStateKind.WaitingPlayer });
+    this.gameStateSummary = this.createState({
+      kind: "waiting-player",
+    });
   }
 
   gameIsFull(): boolean {
@@ -46,18 +49,18 @@ export class GameController implements GameControllerInterface {
 
     // Reached the number of players, start game.
     if (this.game.players.length == this.game.rules.numberOfPlayers) {
-      this.gameState = this.createState(
+      this.gameStateSummary = this.createState(
         this.createNextTurn(this.game.players[0].identifier)
       );
-      this.gameStateCallback(this.gameState);
+      this.gameStateCallback(this.gameStateSummary);
     }
   }
 
   play(col: number, playerId: string) {
-    if (this.gameState.state.kind != GameStateKind.Turn) throw InvalidMoveError;
-    if (this.gameState.state.playerId != playerId) throw WrongTurnError;
+    if (this.gameStateSummary.state.kind != "turn") throw InvalidMoveError;
+    if (this.gameStateSummary.state.playerId != playerId) throw WrongTurnError;
 
-    const die = this.gameState.state.die;
+    const die = this.gameStateSummary.state.die;
     const player = this.game.players.filter((p) => p.identifier == playerId)[0];
 
     // If the column is already full, throw error.
@@ -80,8 +83,8 @@ export class GameController implements GameControllerInterface {
       return;
     }
 
-    this.gameState = this.createState(this.createNextTurn(playerId));
-    this.gameStateCallback(this.gameState);
+    this.gameStateSummary = this.createState(this.createNextTurn(playerId));
+    this.gameStateCallback(this.gameStateSummary);
   }
 
   finishGame() {
@@ -99,12 +102,15 @@ export class GameController implements GameControllerInterface {
     }
 
     if (!winnerId) {
-      this.gameState = this.createState({ kind: GameStateKind.Tie });
+      this.gameStateSummary = this.createState({ kind: "tie" });
     } else {
-      this.gameState = this.createState({ kind: GameStateKind.Win, winnerId });
+      this.gameStateSummary = this.createState({
+        kind: "win",
+        winnerId,
+      });
     }
 
-    this.gameStateCallback(this.gameState);
+    this.gameStateCallback(this.gameStateSummary);
   }
 
   // Helper functions
@@ -118,13 +124,13 @@ export class GameController implements GameControllerInterface {
 
   createNextTurn(previousPlayer: string): Turn {
     return {
-      kind: GameStateKind.Turn,
+      kind: "turn",
       playerId: this.nextPlayerAfter(previousPlayer),
       die: this.diceTower.throwDice(1, this.game.rules.dieCount),
     };
   }
 
-  createState(state: PlayState): GameState {
+  createState(state: GameState): GameStateSummary {
     return {
       boardState: createBoardState(this.game),
       state: state,

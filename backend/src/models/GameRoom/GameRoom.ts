@@ -4,8 +4,8 @@ import DefaultRules from "../rules/DefaultRules";
 import { randomUUID } from "crypto";
 import { Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { ServerEvent } from "../GameRoomEvents";
-import { GameState } from "../game/states";
+import { ServerEvent } from "./GameRoomEvents";
+import { GameStateSummary } from "../game/states";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
 
 type IOSocket = Socket<
@@ -121,7 +121,7 @@ export class GameRoom {
     this.emit(socket, { kind: "reconnect", success: true, id: player.id });
     this.emit(socket, {
       kind: "game-state-update",
-      state: this.controller.gameState,
+      state: this.controller.gameStateSummary,
     });
   }
 
@@ -129,7 +129,7 @@ export class GameRoom {
     socket.emit(event.kind, event);
   }
 
-  handleGameStateChange(state: GameState) {
+  handleGameStateChange(state: GameStateSummary) {
     for (const client of [...this.players, ...this.spectators]) {
       this.emit(client.socket, { kind: "game-state-update", state });
     }

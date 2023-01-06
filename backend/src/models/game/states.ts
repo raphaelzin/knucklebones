@@ -1,30 +1,31 @@
-export enum GameStateKind {
-  Tie = "tie",
-  Win = "win",
-  WaitingPlayer = "waiting-player",
-  Turn = "turn",
-}
+// Game states
+
+export type GameStateKind = "tie" | "win" | "waiting-player" | "turn";
 
 export interface Turn {
-  kind: GameStateKind.Turn;
+  kind: "turn";
   playerId: string;
   die: number;
 }
 
-// Game states
-
 export interface WinningFinish {
-  kind: GameStateKind.Win;
+  kind: "win";
   winnerId: string;
 }
 
 export interface TieFinish {
-  kind: GameStateKind.Tie;
+  kind: "tie";
 }
 
 export interface WaitingPlayer {
-  kind: GameStateKind.WaitingPlayer;
+  kind: "waiting-player";
 }
+
+export type FinishedState = WinningFinish | TieFinish;
+
+export type GameState = Turn | FinishedState | WaitingPlayer;
+
+// Board states
 
 export interface PlayerBoardState {
   nickname: string;
@@ -36,11 +37,7 @@ export interface BoardState {
   players: { [key: string]: PlayerBoardState };
 }
 
-export type FinishedState = WinningFinish | TieFinish;
-
-export type PlayState = Turn | FinishedState | WaitingPlayer;
-
-export interface GameState {
+export interface GameStateSummary {
   boardState: BoardState;
-  state: PlayState;
+  state: GameState;
 }

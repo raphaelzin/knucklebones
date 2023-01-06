@@ -1,4 +1,5 @@
-import { Game, Rules } from "../game/board";
+import { Game } from "../game/Game";
+import { Rules } from "./Rules";
 
 class DefaultRules implements Rules {
   dieCount = 6;

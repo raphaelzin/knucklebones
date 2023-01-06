@@ -7,7 +7,7 @@ function $parcel$interopDefault(a) {
 }
 
 
-/* eslint-disable @typescript-eslint/no-explicit-any */ function $d4043330dc9cb8c3$export$89afb3b1226ef1c9(game) {
+/* eslint-disable @typescript-eslint/no-explicit-any */ function $150417499b1a31b8$export$89afb3b1226ef1c9(game) {
     const state = {};
     for (const player of game.players)state[player.identifier] = {
         nickname: player.nickname,
@@ -18,7 +18,7 @@ function $parcel$interopDefault(a) {
         players: state
     };
 }
-function $d4043330dc9cb8c3$export$cae4205f9169b2e9(id, game) {
+function $150417499b1a31b8$export$cae4205f9169b2e9(id, game) {
     for (const player of game.players){
         if (player.identifier == id) return player;
     }
@@ -32,15 +32,6 @@ class $9c65ea2d50b878f6$var$DiceTower {
     }
 }
 var $9c65ea2d50b878f6$export$2e2bcd8739ae039 = new $9c65ea2d50b878f6$var$DiceTower();
-
-
-let $ad568d6795d525df$export$2f5ad171a7535ea7;
-(function(GameStateKind) {
-    GameStateKind["Tie"] = "tie";
-    GameStateKind["Win"] = "win";
-    GameStateKind["WaitingPlayer"] = "waiting-player";
-    GameStateKind["Turn"] = "turn";
-})($ad568d6795d525df$export$2f5ad171a7535ea7 || ($ad568d6795d525df$export$2f5ad171a7535ea7 = {}));
 
 
 // Play Errors
@@ -87,8 +78,8 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
             rules: rules,
             players: []
         };
-        this.gameState = this.createState({
-            kind: (0, $ad568d6795d525df$export$2f5ad171a7535ea7).WaitingPlayer
+        this.gameStateSummary = this.createState({
+            kind: "waiting-player"
         });
     }
     gameIsFull() {
@@ -104,14 +95,14 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
         });
         // Reached the number of players, start game.
         if (this.game.players.length == this.game.rules.numberOfPlayers) {
-            this.gameState = this.createState(this.createNextTurn(this.game.players[0].identifier));
-            this.gameStateCallback(this.gameState);
+            this.gameStateSummary = this.createState(this.createNextTurn(this.game.players[0].identifier));
+            this.gameStateCallback(this.gameStateSummary);
         }
     }
     play(col, playerId) {
-        if (this.gameState.state.kind != (0, $ad568d6795d525df$export$2f5ad171a7535ea7).Turn) throw 0, $adcca57938cc80af$export$61011c9359f9bd4a;
-        if (this.gameState.state.playerId != playerId) throw 0, $adcca57938cc80af$export$3528e15a3aebe6cd;
-        const die = this.gameState.state.die;
+        if (this.gameStateSummary.state.kind != "turn") throw 0, $adcca57938cc80af$export$61011c9359f9bd4a;
+        if (this.gameStateSummary.state.playerId != playerId) throw 0, $adcca57938cc80af$export$3528e15a3aebe6cd;
+        const die = this.gameStateSummary.state.die;
         const player = this.game.players.filter((p)=>p.identifier == playerId)[0];
         // If the column is already full, throw error.
         if (player.board[col].length >= this.game.rules.boardSize || col < 0) throw 0, $adcca57938cc80af$export$12f3fca0ab75890f;
@@ -124,8 +115,8 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
             this.finishGame();
             return;
         }
-        this.gameState = this.createState(this.createNextTurn(playerId));
-        this.gameStateCallback(this.gameState);
+        this.gameStateSummary = this.createState(this.createNextTurn(playerId));
+        this.gameStateCallback(this.gameStateSummary);
     }
     finishGame() {
         let bestScore = -1;
@@ -137,14 +128,14 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
                 winnerId = player.identifier;
             } else if (score == bestScore) winnerId = undefined;
         }
-        if (!winnerId) this.gameState = this.createState({
-            kind: (0, $ad568d6795d525df$export$2f5ad171a7535ea7).Tie
+        if (!winnerId) this.gameStateSummary = this.createState({
+            kind: "tie"
         });
-        else this.gameState = this.createState({
-            kind: (0, $ad568d6795d525df$export$2f5ad171a7535ea7).Win,
+        else this.gameStateSummary = this.createState({
+            kind: "win",
             winnerId: winnerId
         });
-        this.gameStateCallback(this.gameState);
+        this.gameStateCallback(this.gameStateSummary);
     }
     // Helper functions
     nextPlayerAfter(playerId) {
@@ -155,14 +146,14 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
     }
     createNextTurn(previousPlayer) {
         return {
-            kind: (0, $ad568d6795d525df$export$2f5ad171a7535ea7).Turn,
+            kind: "turn",
             playerId: this.nextPlayerAfter(previousPlayer),
             die: this.diceTower.throwDice(1, this.game.rules.dieCount)
         };
     }
     createState(state) {
         return {
-            boardState: (0, $d4043330dc9cb8c3$export$89afb3b1226ef1c9)(this.game),
+            boardState: (0, $150417499b1a31b8$export$89afb3b1226ef1c9)(this.game),
             state: state
         };
     }
@@ -308,7 +299,7 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
         });
         this.emit(socket, {
             kind: "game-state-update",
-            state: this.controller.gameState
+            state: this.controller.gameStateSummary
         });
     }
     emit(socket, event) {

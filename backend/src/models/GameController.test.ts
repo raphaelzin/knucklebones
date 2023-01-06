@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect, describe, test } from "@jest/globals";
 import { DiceTowerInterface } from "./game/DiceTower";
-import { GameState, GameStateKind } from "./game/states";
+import { GameStateSummary } from "./game/states";
 import { GameController } from "./GameController";
 import DefaultRules from "./rules/DefaultRules";
 
@@ -19,7 +19,7 @@ class RiggedDice implements DiceTowerInterface {
 
 const diceTower = new RiggedDice();
 const controller = new GameController(DefaultRules, diceTower);
-const stateListener = (_state: GameState) => {
+const stateListener = (_state: GameStateSummary) => {
   return;
 };
 
@@ -29,7 +29,7 @@ describe("Game Controller", () => {
   test("player can enter game", () => {
     controller.enterGame("john", "1");
     expect(controller.game.players[0].identifier).toBe("1");
-    expect(controller.gameState.state.kind).toBe(GameStateKind.WaitingPlayer);
+    expect(controller.gameStateSummary.state.kind).toBe("waiting-player");
   });
 
   // Ensures next die is 5.
@@ -37,21 +37,23 @@ describe("Game Controller", () => {
 
   test("game emits state update when players have joined", () => {
     controller.enterGame("maria", "2");
-    expect(controller.gameState.state.kind).toBe(GameStateKind.Turn);
+    expect(controller.gameStateSummary.state.kind).toBe("turn");
   });
 
   test("player can play and score is updated", () => {
-    if (controller.gameState.state.kind != GameStateKind.Turn) {
-      expect(controller.gameState.state.kind).toBe(GameStateKind.Turn);
+    if (controller.gameStateSummary.state.kind != "turn") {
+      expect(controller.gameStateSummary.state.kind).toBe("turn");
       return;
     }
 
-    const playerId = controller.gameState.state.playerId;
+    const playerId = controller.gameStateSummary.state.playerId;
 
     controller.play(0, playerId);
-    expect(controller.gameState.boardState.players[playerId].score).toBe(5);
-    expect(controller.gameState.boardState.players[playerId].board[0][0]).toBe(
+    expect(controller.gameStateSummary.boardState.players[playerId].score).toBe(
       5
     );
+    expect(
+      controller.gameStateSummary.boardState.players[playerId].board[0][0]
+    ).toBe(5);
   });
 });

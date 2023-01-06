@@ -1,19 +1,10 @@
-import { Player } from "./board";
-import { GameState } from "./states";
+import { GameStateSummary } from "./states";
 
-export enum GameEventKind {
-  StateUpdate = "state-update",
-  PlayerUpdate = "player-update",
-}
+export type GameEventKind = "state-update";
 
 export interface GameStateUpdateEvent {
-  kind: GameEventKind.StateUpdate;
-  state: GameState;
+  kind: "state-update";
+  state: GameStateSummary;
 }
 
-export interface PlayerUpdateEvent {
-  kind: GameEventKind.PlayerUpdate;
-  player: Player;
-}
-
-export type GameEvent = GameStateUpdateEvent | PlayerUpdateEvent;
+export type GameEvent = GameStateUpdateEvent;

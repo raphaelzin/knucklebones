@@ -4,11 +4,12 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
-    "dev": "nodemon -e ts --watch 'src/**/*.ts' --exec 'tsc && node dist/app.js'",
-    "build": "tsc",
+    "dev": "nodemon -e ts --watch 'src/**/*.ts' --exec 'yarn build && node dist/app.js'",
+    "start": "npx parcel build ./src/app.ts && node dist/app.js",
+    "build": "npx parcel build ./src/app.ts",
     "test": "jest --watchAll",
-    "start": "tsc && node dist/app.js",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "type-check": "tsc"
   },
   "keywords": [],
   "author": "",
