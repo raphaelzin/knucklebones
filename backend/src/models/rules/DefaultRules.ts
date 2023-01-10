@@ -2,8 +2,8 @@ import { Game } from "../game/Game";
 import { Rules } from "./Rules";
 
 class DefaultRules implements Rules {
-  dieCount = 6;
   boardSize = 3;
+  dieSideCount = 6;
   numberOfPlayers = 2;
 
   evaluateGameEnd(game: Game): boolean {

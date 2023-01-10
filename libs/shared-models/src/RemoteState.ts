@@ -1,5 +1,3 @@
-// Game states
-
 export type GameStateKind = "tie" | "win" | "waiting-player" | "turn";
 
 export interface Turn {
@@ -24,8 +22,6 @@ export interface WaitingPlayer {
 export type FinishedState = WinningFinish | TieFinish;
 
 export type GameState = Turn | FinishedState | WaitingPlayer;
-
-// Board states
 
 export interface PlayerBoardState {
   nickname: string;

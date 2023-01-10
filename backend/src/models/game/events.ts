@@ -1,4 +1,4 @@
-import { GameStateSummary } from "./states";
+import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 
 export type GameEventKind = "state-update";
 

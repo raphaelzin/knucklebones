@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { expect, describe, test } from "@jest/globals";
 import { DiceTowerInterface } from "./game/DiceTower";
-import { GameStateSummary } from "./game/states";
+import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { GameController } from "./GameController";
 import DefaultRules from "./rules/DefaultRules";
 

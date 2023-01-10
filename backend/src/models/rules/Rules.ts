@@ -1,8 +1,8 @@
 import { Game } from "../game/Game";
 
 export interface Rules {
-  dieCount: number;
   boardSize: number;
+  dieSideCount: number;
   numberOfPlayers: number;
 
   calculateScore(board: number[][]): number;

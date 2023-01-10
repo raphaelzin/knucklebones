@@ -1,7 +1,11 @@
 import { createBoardState, Game } from "./game/Game";
 import { Rules } from "./rules/Rules";
 import DiceTower, { DiceTowerInterface } from "./game/DiceTower";
-import { GameStateSummary, GameState, Turn } from "./game/states";
+import {
+  GameStateSummary,
+  GameState,
+  Turn,
+} from "@knucklebones/shared-models/src/RemoteState";
 
 import {
   ColumnFullError,
@@ -126,7 +130,7 @@ export class GameController implements GameControllerInterface {
     return {
       kind: "turn",
       playerId: this.nextPlayerAfter(previousPlayer),
-      die: this.diceTower.throwDice(1, this.game.rules.dieCount),
+      die: this.diceTower.throwDice(1, this.game.rules.dieSideCount),
     };
   }
 

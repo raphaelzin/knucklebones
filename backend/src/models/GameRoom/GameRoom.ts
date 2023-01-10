@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 import { Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ServerEvent } from "./GameRoomEvents";
-import { GameStateSummary } from "../game/states";
+import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
 
 type IOSocket = Socket<

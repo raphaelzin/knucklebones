@@ -1,4 +1,4 @@
-import { GameStateSummary } from "../game/states";
+import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { GameError } from "./GameRoomErrors";
 
 export type GameRoomEventKind =

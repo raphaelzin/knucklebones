@@ -1,0 +1,11 @@
+{
+  "name": "knucklebones",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "web",
+    "libs/*"
+  ]
+}

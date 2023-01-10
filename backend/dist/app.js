@@ -1,13 +1,13 @@
-var $ek9MX$express = require("express");
-var $ek9MX$socketio = require("socket.io");
-var $ek9MX$crypto = require("crypto");
+var $1FMIp$express = require("express");
+var $1FMIp$socketio = require("socket.io");
+var $1FMIp$crypto = require("crypto");
 
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
 
 
-/* eslint-disable @typescript-eslint/no-explicit-any */ function $150417499b1a31b8$export$89afb3b1226ef1c9(game) {
+/* eslint-disable @typescript-eslint/no-explicit-any */ function $ecacab428e61e01a$export$89afb3b1226ef1c9(game) {
     const state = {};
     for (const player of game.players)state[player.identifier] = {
         nickname: player.nickname,
@@ -18,7 +18,7 @@ function $parcel$interopDefault(a) {
         players: state
     };
 }
-function $150417499b1a31b8$export$cae4205f9169b2e9(id, game) {
+function $ecacab428e61e01a$export$cae4205f9169b2e9(id, game) {
     for (const player of game.players){
         if (player.identifier == id) return player;
     }
@@ -26,41 +26,41 @@ function $150417499b1a31b8$export$cae4205f9169b2e9(id, game) {
 }
 
 
-class $9c65ea2d50b878f6$var$DiceTower {
+class $4b804b1cef173b97$var$DiceTower {
     throwDice(diceCount, sides) {
         return Math.floor(Math.random() * sides * diceCount) + 1;
     }
 }
-var $9c65ea2d50b878f6$export$2e2bcd8739ae039 = new $9c65ea2d50b878f6$var$DiceTower();
+var $4b804b1cef173b97$export$2e2bcd8739ae039 = new $4b804b1cef173b97$var$DiceTower();
 
 
 // Play Errors
-const $adcca57938cc80af$export$12f3fca0ab75890f = {
+const $8925cb211138c4b2$export$12f3fca0ab75890f = {
     error: "column-full",
     domain: "game",
     message: "The selected column is already full"
 };
-const $adcca57938cc80af$export$3528e15a3aebe6cd = {
+const $8925cb211138c4b2$export$3528e15a3aebe6cd = {
     error: "wrong-player-turn",
     domain: "game",
     message: "It is not your turn."
 };
-const $adcca57938cc80af$export$61011c9359f9bd4a = {
+const $8925cb211138c4b2$export$61011c9359f9bd4a = {
     error: "invalid-move",
     domain: "game",
     message: "This is an invalid play"
 };
-const $adcca57938cc80af$export$982d9566950a5c3e = {
+const $8925cb211138c4b2$export$982d9566950a5c3e = {
     error: "invalid-column",
     domain: "game",
     message: "The selected column is not valid."
 };
-const $adcca57938cc80af$export$31f1c7902a035837 = {
+const $8925cb211138c4b2$export$31f1c7902a035837 = {
     error: "full-house",
     domain: "game",
     message: "This game is already full. Consider entering as a spectator"
 };
-const $adcca57938cc80af$export$18a9427d80c1a057 = (message, debugMessage)=>{
+const $8925cb211138c4b2$export$18a9427d80c1a057 = (message, debugMessage)=>{
     return {
         error: "invalid-payload",
         domain: "game-room",
@@ -70,9 +70,9 @@ const $adcca57938cc80af$export$18a9427d80c1a057 = (message, debugMessage)=>{
 };
 
 
-class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
+class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
     gameStateCallback = undefined;
-    constructor(rules, diceTower = (0, $9c65ea2d50b878f6$export$2e2bcd8739ae039)){
+    constructor(rules, diceTower = (0, $4b804b1cef173b97$export$2e2bcd8739ae039)){
         this.diceTower = diceTower;
         this.game = {
             rules: rules,
@@ -100,12 +100,12 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
         }
     }
     play(col, playerId) {
-        if (this.gameStateSummary.state.kind != "turn") throw 0, $adcca57938cc80af$export$61011c9359f9bd4a;
-        if (this.gameStateSummary.state.playerId != playerId) throw 0, $adcca57938cc80af$export$3528e15a3aebe6cd;
+        if (this.gameStateSummary.state.kind != "turn") throw 0, $8925cb211138c4b2$export$61011c9359f9bd4a;
+        if (this.gameStateSummary.state.playerId != playerId) throw 0, $8925cb211138c4b2$export$3528e15a3aebe6cd;
         const die = this.gameStateSummary.state.die;
         const player = this.game.players.filter((p)=>p.identifier == playerId)[0];
         // If the column is already full, throw error.
-        if (player.board[col].length >= this.game.rules.boardSize || col < 0) throw 0, $adcca57938cc80af$export$12f3fca0ab75890f;
+        if (player.board[col].length >= this.game.rules.boardSize || col < 0) throw 0, $8925cb211138c4b2$export$12f3fca0ab75890f;
         for (const player1 of this.game.players)if (player1.identifier != playerId) // Removes instances of die in that column of other players
         player1.board[col] = player1.board[col].filter((x)=>x != die);
         else // Adds die to current player
@@ -153,14 +153,14 @@ class $6a311da3bdff5d6a$export$f3f3f6c0124f08de {
     }
     createState(state) {
         return {
-            boardState: (0, $150417499b1a31b8$export$89afb3b1226ef1c9)(this.game),
+            boardState: (0, $ecacab428e61e01a$export$89afb3b1226ef1c9)(this.game),
             state: state
         };
     }
 }
 
 
-class $afcbcab24fda2530$var$DefaultRules {
+class $e21924dae8dc3455$var$DefaultRules {
     dieCount = 6;
     boardSize = 3;
     numberOfPlayers = 2;
@@ -192,15 +192,15 @@ class $afcbcab24fda2530$var$DefaultRules {
         return score;
     }
 }
-var $afcbcab24fda2530$export$2e2bcd8739ae039 = new $afcbcab24fda2530$var$DefaultRules();
+var $e21924dae8dc3455$export$2e2bcd8739ae039 = new $e21924dae8dc3455$var$DefaultRules();
 
 
 
 
-class $ab3d57682f792e68$export$ddffd877baf3c775 {
+class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
     constructor(code){
         this.code = code;
-        this.controller = new (0, $6a311da3bdff5d6a$export$f3f3f6c0124f08de)((0, $afcbcab24fda2530$export$2e2bcd8739ae039));
+        this.controller = new (0, $cbed54bc08405ed8$export$f3f3f6c0124f08de)((0, $e21924dae8dc3455$export$2e2bcd8739ae039));
         this.controller.gameStateCallback = (state)=>{
             this.handleGameStateChange(state);
         };
@@ -217,13 +217,13 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
         if (this.controller.gameIsFull()) {
             this.emit(socket, {
                 kind: "error",
-                error: (0, $adcca57938cc80af$export$31f1c7902a035837)
+                error: (0, $8925cb211138c4b2$export$31f1c7902a035837)
             });
             socket.disconnect(true);
             return;
         }
-        const id = (0, $ek9MX$crypto.randomUUID)();
-        const token = (0, $ek9MX$crypto.randomUUID)();
+        const id = (0, $1FMIp$crypto.randomUUID)();
+        const token = (0, $1FMIp$crypto.randomUUID)();
         const client = {
             id: id,
             socket: socket,
@@ -240,8 +240,8 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
         this.controller.enterGame(nickname, id);
     }
     spectateGame(socket) {
-        const id = (0, $ek9MX$crypto.randomUUID)();
-        const token = (0, $ek9MX$crypto.randomUUID)();
+        const id = (0, $1FMIp$crypto.randomUUID)();
+        const token = (0, $1FMIp$crypto.randomUUID)();
         const client = {
             id: id,
             socket: socket,
@@ -265,7 +265,7 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
         if (column === undefined || !player) {
             this.emit(socket, {
                 kind: "error",
-                error: (0, $adcca57938cc80af$export$18a9427d80c1a057)("Invalid or missing Column or token", payload)
+                error: (0, $8925cb211138c4b2$export$18a9427d80c1a057)("Invalid or missing Column or token", payload)
             });
             return;
         }
@@ -317,36 +317,36 @@ class $ab3d57682f792e68$export$ddffd877baf3c775 {
 }
 
 
-const $385422aa0e335287$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($ek9MX$express))).Router();
-$385422aa0e335287$export$5375cda95f0b0eb4.use((0, ($parcel$interopDefault($ek9MX$express))).json());
-const $385422aa0e335287$var$rooms = [
-    new (0, $ab3d57682f792e68$export$ddffd877baf3c775)("0")
+const $3f204e84b16f54c0$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($1FMIp$express))).Router();
+$3f204e84b16f54c0$export$5375cda95f0b0eb4.use((0, ($parcel$interopDefault($1FMIp$express))).json());
+const $3f204e84b16f54c0$var$rooms = [
+    new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)("0")
 ];
-let $385422aa0e335287$var$counter = 1;
-$385422aa0e335287$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
+let $3f204e84b16f54c0$var$counter = 1;
+$3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
     if (!req.params) {
         res.statusCode = 404;
         return;
     }
-    const newRoomCode = `${$385422aa0e335287$var$counter}`;
-    $385422aa0e335287$var$rooms.push(new (0, $ab3d57682f792e68$export$ddffd877baf3c775)(newRoomCode));
-    $385422aa0e335287$var$counter += 1;
+    const newRoomCode = `${$3f204e84b16f54c0$var$counter}`;
+    $3f204e84b16f54c0$var$rooms.push(new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)(newRoomCode));
+    $3f204e84b16f54c0$var$counter += 1;
     res.statusCode = 200;
     res.send(`${newRoomCode} :)`);
 });
-const $385422aa0e335287$var$io = new (0, $ek9MX$socketio.Server)(4444, {
+const $3f204e84b16f54c0$var$io = new (0, $1FMIp$socketio.Server)(4444, {
     cors: {
         origin: "http://localhost:3000"
     }
 });
-$385422aa0e335287$var$io.of("/game/play").on("connection", (socket)=>{
+$3f204e84b16f54c0$var$io.of("/game/play").on("connection", (socket)=>{
     const { roomCode: roomCode , nickname: nickname , token: token  } = socket.handshake.query;
     if (!roomCode || !nickname) {
         socket.emit("bye-bye", "Room code or nickname missing.");
         socket.disconnect(true);
         return;
     }
-    const room = $385422aa0e335287$var$getRoom(roomCode);
+    const room = $3f204e84b16f54c0$var$getRoom(roomCode);
     if (!room) {
         socket.emit("bye-bye", `No room with code ${roomCode}.`);
         socket.disconnect(true);
@@ -359,14 +359,14 @@ $385422aa0e335287$var$io.of("/game/play").on("connection", (socket)=>{
         socket.disconnect(true);
     }
 });
-$385422aa0e335287$var$io.of("/game/watch").on("connection", (socket)=>{
+$3f204e84b16f54c0$var$io.of("/game/watch").on("connection", (socket)=>{
     const { roomCode: roomCode  } = socket.handshake.query;
     if (!roomCode) {
         socket.emit("bye-bye", "Room code or nickname missing.");
         socket.disconnect(true);
         return;
     }
-    const room = $385422aa0e335287$var$getRoom(roomCode);
+    const room = $3f204e84b16f54c0$var$getRoom(roomCode);
     if (!room) {
         socket.emit("bye-bye", "No room with that code.");
         socket.disconnect(true);
@@ -374,9 +374,9 @@ $385422aa0e335287$var$io.of("/game/watch").on("connection", (socket)=>{
     }
     room.spectateGame(socket);
 });
-const $385422aa0e335287$var$getRoom = (code)=>{
+const $3f204e84b16f54c0$var$getRoom = (code)=>{
     // TODO: Get channel on Redis
-    for (const room of $385422aa0e335287$var$rooms){
+    for (const room of $3f204e84b16f54c0$var$rooms){
         if (room.code == code) return room;
     }
     return undefined;
@@ -384,10 +384,10 @@ const $385422aa0e335287$var$getRoom = (code)=>{
 
 
 
-const $919eefa079760b8d$var$app = (0, ($parcel$interopDefault($ek9MX$express)))();
-$919eefa079760b8d$var$app.use((0, ($parcel$interopDefault($ek9MX$express))).json());
-$919eefa079760b8d$var$app.use("/game", (0, $385422aa0e335287$export$5375cda95f0b0eb4));
-$919eefa079760b8d$var$app.listen(6000, ()=>{
+const $9d7548254fcccc8a$var$app = (0, ($parcel$interopDefault($1FMIp$express)))();
+$9d7548254fcccc8a$var$app.use((0, ($parcel$interopDefault($1FMIp$express))).json());
+$9d7548254fcccc8a$var$app.use("/game", (0, $3f204e84b16f54c0$export$5375cda95f0b0eb4));
+$9d7548254fcccc8a$var$app.listen(6000, ()=>{
     console.log(`⚡️[server]: Server is running at https://localhost:${6000}`);
 });
 
