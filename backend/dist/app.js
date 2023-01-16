@@ -1,10 +1,12 @@
 var $1FMIp$express = require("express");
+var $1FMIp$cors = require("cors");
 var $1FMIp$socketio = require("socket.io");
 var $1FMIp$crypto = require("crypto");
 
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
 }
+
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */ function $ecacab428e61e01a$export$89afb3b1226ef1c9(game) {
@@ -148,7 +150,7 @@ class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
         return {
             kind: "turn",
             playerId: this.nextPlayerAfter(previousPlayer),
-            die: this.diceTower.throwDice(1, this.game.rules.dieCount)
+            die: this.diceTower.throwDice(1, this.game.rules.dieSideCount)
         };
     }
     createState(state) {
@@ -161,8 +163,8 @@ class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
 
 
 class $e21924dae8dc3455$var$DefaultRules {
-    dieCount = 6;
     boardSize = 3;
+    dieSideCount = 6;
     numberOfPlayers = 2;
     evaluateGameEnd(game) {
         const boards = game.players.map((p)=>p.board);
@@ -317,56 +319,112 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
 }
 
 
+// const client = createClient({
+//   url: "",
+// });
+// const RoomStateStream = (code: string) => `room-stream-state-${code}`;
+// const StreamRoom = (code: string) => `room-stream-${code}`;
+// const PubSubRoom = (code: string) => `room-pubsub-${code}`;
+// Generates a RoomSummary cache key from a code.
+// const RoomSummaryKey = (code: string) => `room-summary-${code}`;
+// export interface RoomSummary {
+//   stateSummary: GameStateSummary;
+//   rules: "default";
+//   code: string;
+// }
+// const StreamStartEvent = (code: string) => {
+//   return `room ${code} created at ${new Date()}`;
+// };
+// const addStreamEntry = async (
+//   entry: Record<string, string>,
+//   streamId: string,
+//   createOnMiss = false
+// ) => {
+//   return await client.xAdd(streamId, "*", entry, {
+//     NOMKSTREAM: createOnMiss ? true : undefined,
+//   });
+// };
+const $c57c9ea430dd510b$var$rooms = [];
+const $c57c9ea430dd510b$export$ddb5e34974173ddf = async (code)=>{
+    //   const streamId = RoomStateStream(code);
+    //   if ((await client.exists(streamId)) !== 1) {
+    //     throw "room not found";
+    //   }
+    const room = $c57c9ea430dd510b$var$rooms.filter((room)=>room.code === code)[0];
+    if (!room) throw "room not found";
+    return room;
+};
+const $c57c9ea430dd510b$export$4a6fbf23fa252689 = async ()=>{
+    const code = (0, $1FMIp$crypto.randomUUID)();
+    // const streamId = RoomStateStream(code);
+    // const startEvent = { event: StreamStartEvent(code) };
+    // await addStreamEntry(startEvent, streamId, true);
+    const newRoom = new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)(code);
+    $c57c9ea430dd510b$var$rooms.push(newRoom);
+    return newRoom;
+}; // export const getRoomPreviousStates = async (code: string, count: number) => {
+ //   const streamId = RoomStateStream(code);
+ //   const result = await client.xRevRange(streamId, "+", "-", { COUNT: count });
+ //   const messages = result.map((entry) => entry.message);
+ //   return messages["state"];
+ // };
+
+
 const $3f204e84b16f54c0$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($1FMIp$express))).Router();
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.use((0, ($parcel$interopDefault($1FMIp$express))).json());
-const $3f204e84b16f54c0$var$rooms = [
-    new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)("0")
-];
-let $3f204e84b16f54c0$var$counter = 1;
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
     if (!req.params) {
         res.statusCode = 404;
         return;
     }
-    const newRoomCode = `${$3f204e84b16f54c0$var$counter}`;
-    $3f204e84b16f54c0$var$rooms.push(new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)(newRoomCode));
-    $3f204e84b16f54c0$var$counter += 1;
+    let newRoom;
+    try {
+        newRoom = await (0, $c57c9ea430dd510b$export$4a6fbf23fa252689)();
+    } catch (error) {
+        res.statusCode = error.code;
+        res.send({
+            error: error,
+            code: error.code
+        });
+        return;
+    }
+    console.log(`Room created: ${newRoom.code}`);
     res.statusCode = 200;
-    res.send(`${newRoomCode} :)`);
+    res.send({
+        data: {
+            code: newRoom.code
+        }
+    });
 });
+// TODO: use dotenv
 const $3f204e84b16f54c0$var$io = new (0, $1FMIp$socketio.Server)(4444, {
     cors: {
         origin: "http://localhost:3000"
     }
 });
-$3f204e84b16f54c0$var$io.of("/game/play").on("connection", (socket)=>{
+$3f204e84b16f54c0$var$io.of("/game/play").on("connection", async (socket)=>{
     const { roomCode: roomCode , nickname: nickname , token: token  } = socket.handshake.query;
     if (!roomCode || !nickname) {
         socket.emit("bye-bye", "Room code or nickname missing.");
         socket.disconnect(true);
         return;
     }
-    const room = $3f204e84b16f54c0$var$getRoom(roomCode);
-    if (!room) {
-        socket.emit("bye-bye", `No room with code ${roomCode}.`);
-        socket.disconnect(true);
-        return;
-    }
     try {
+        const room = await (0, $c57c9ea430dd510b$export$ddb5e34974173ddf)(roomCode);
         room.enterGame(socket, nickname, token);
     } catch (error) {
         socket.emit("bye-bye", `an error: ${error}`);
         socket.disconnect(true);
     }
 });
-$3f204e84b16f54c0$var$io.of("/game/watch").on("connection", (socket)=>{
+$3f204e84b16f54c0$var$io.of("/game/watch").on("connection", async (socket)=>{
     const { roomCode: roomCode  } = socket.handshake.query;
     if (!roomCode) {
         socket.emit("bye-bye", "Room code or nickname missing.");
         socket.disconnect(true);
         return;
     }
-    const room = $3f204e84b16f54c0$var$getRoom(roomCode);
+    const room = await (0, $c57c9ea430dd510b$export$ddb5e34974173ddf)(roomCode);
     if (!room) {
         socket.emit("bye-bye", "No room with that code.");
         socket.disconnect(true);
@@ -374,20 +432,19 @@ $3f204e84b16f54c0$var$io.of("/game/watch").on("connection", (socket)=>{
     }
     room.spectateGame(socket);
 });
-const $3f204e84b16f54c0$var$getRoom = (code)=>{
-    // TODO: Get channel on Redis
-    for (const room of $3f204e84b16f54c0$var$rooms){
-        if (room.code == code) return room;
-    }
-    return undefined;
-};
+
 
 
 
 const $9d7548254fcccc8a$var$app = (0, ($parcel$interopDefault($1FMIp$express)))();
 $9d7548254fcccc8a$var$app.use((0, ($parcel$interopDefault($1FMIp$express))).json());
+$9d7548254fcccc8a$var$app.use((0, ($parcel$interopDefault($1FMIp$cors)))({
+    origin: [
+        "http://localhost:3000"
+    ]
+}));
 $9d7548254fcccc8a$var$app.use("/game", (0, $3f204e84b16f54c0$export$5375cda95f0b0eb4));
-$9d7548254fcccc8a$var$app.listen(6000, ()=>{
+$9d7548254fcccc8a$var$app.listen(4000, ()=>{
     console.log(`⚡️[server]: Server is running at https://localhost:${6000}`);
 });
 

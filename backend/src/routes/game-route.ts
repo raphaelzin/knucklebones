@@ -1,12 +1,10 @@
 import { Server as WebSocketServer } from "socket.io";
 import express, { Request, Response } from "express";
+import { createRoom, getRoom } from "../controllers/RoomService";
 import { GameRoom } from "../models/GameRoom/GameRoom";
 
 export const router = express.Router();
 router.use(express.json());
-
-const rooms: GameRoom[] = [new GameRoom("0")];
-let counter = 1;
 
 router.post("/create-game", async (req: Request, res: Response) => {
   if (!req.params) {
@@ -14,21 +12,32 @@ router.post("/create-game", async (req: Request, res: Response) => {
     return;
   }
 
-  const newRoomCode = `${counter}`;
-  rooms.push(new GameRoom(newRoomCode));
-  counter += 1;
+  let newRoom: GameRoom;
+  try {
+    newRoom = await createRoom();
+  } catch (error) {
+    res.statusCode = error.code;
+    res.send({ error, code: error.code });
+    return;
+  }
 
+  console.log(`Room created: ${newRoom.code}`);
   res.statusCode = 200;
-  res.send(`${newRoomCode} :)`);
+  res.send({
+    data: {
+      code: newRoom.code,
+    },
+  });
 });
 
+// TODO: use dotenv
 const io = new WebSocketServer(4444, {
   cors: {
     origin: "http://localhost:3000",
   },
 });
 
-io.of("/game/play").on("connection", (socket) => {
+io.of("/game/play").on("connection", async (socket) => {
   const { roomCode, nickname, token } = socket.handshake.query;
 
   if (!roomCode || !nickname) {
@@ -37,14 +46,8 @@ io.of("/game/play").on("connection", (socket) => {
     return;
   }
 
-  const room = getRoom(roomCode as string);
-  if (!room) {
-    socket.emit("bye-bye", `No room with code ${roomCode}.`);
-    socket.disconnect(true);
-    return;
-  }
-
   try {
+    const room = await getRoom(roomCode as string);
     room.enterGame(socket, nickname as string, token as string | undefined);
   } catch (error) {
     socket.emit("bye-bye", `an error: ${error}`);
@@ -52,7 +55,7 @@ io.of("/game/play").on("connection", (socket) => {
   }
 });
 
-io.of("/game/watch").on("connection", (socket) => {
+io.of("/game/watch").on("connection", async (socket) => {
   const { roomCode } = socket.handshake.query;
 
   if (!roomCode) {
@@ -61,7 +64,7 @@ io.of("/game/watch").on("connection", (socket) => {
     return;
   }
 
-  const room = getRoom(roomCode as string);
+  const room = await getRoom(roomCode as string);
   if (!room) {
     socket.emit("bye-bye", "No room with that code.");
     socket.disconnect(true);
@@ -70,12 +73,3 @@ io.of("/game/watch").on("connection", (socket) => {
 
   room.spectateGame(socket);
 });
-
-const getRoom = (code: string): GameRoom => {
-  // TODO: Get channel on Redis
-
-  for (const room of rooms) {
-    if (room.code == code) return room;
-  }
-  return undefined;
-};
