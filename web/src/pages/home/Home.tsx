@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { redirect } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import styled from "styled-components"
 import { Button } from "../../components/Button"
 import { HomeCard } from "../../components/HomeCard"
@@ -39,15 +39,19 @@ const StyledHomeCard = styled(HomeCard)`
 `
 
 export const HomePage: FC = () => {
+  const navigate = useNavigate();
+
   const handleRoomCreation = () => {
     requestRoomCreation().then((code) => {
-      console.log(`received: ${code}`)
-      redirect(`localhost:3000/game/${code}`)
+      navigate(`/games/${code}`)
     }, (error) => {
-      console.log(error)
-      console.log(JSON.stringify(error))
       alert(`error: ${JSON.stringify(error)}`)
     })
+  }
+
+  const joinRoom = (code: string) => {
+    // TODO: join room
+    console.log(code)
   }
 
   return (
@@ -65,18 +69,14 @@ export const HomePage: FC = () => {
 
       <HomeOptionsContainer>
         <StyledHomeCard description="Create a game others can join." emoji="🎲">
-          <form>
-            <Button title="Create game" onClick={handleRoomCreation} />
-          </form>
+          <Button title="Create game" onClick={handleRoomCreation} />
         </StyledHomeCard>
         <StyledHomeCard description="Join an existing game." emoji="🤝">
-          <Button title="Join an existing game" />
+          <TextInput color="#0D6EFD" actionLabel="Join" submit={joinRoom} />
         </StyledHomeCard>
         <StyledHomeCard description="Spectate a game." emoji="👀">
-          <TextInput color="#0D6EFD" actionLabel="Join" />
         </StyledHomeCard>
       </HomeOptionsContainer>
-
     </HomeContainer >
   )
 }

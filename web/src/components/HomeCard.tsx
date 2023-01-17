@@ -19,11 +19,12 @@ const StyledCard = styled.div`
 `
 
 const StyledChildren = styled.div`
-  margin-top: 10px;
+  margin: 10px;
 `
 
 const StyledEmoji = styled.div`
   font-size: 64px;
+  flex-grow: 1;
 `
 
 export const HomeCard: FC<HomeCardProps> = ({ description, emoji, children, className }) => {
