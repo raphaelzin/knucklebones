@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { GameRoom } from "../models/GameRoom/GameRoom";
+import murmurhash from "murmurhash";
 
 // const client = createClient({
 //   url: "",
@@ -47,12 +48,12 @@ export const getRoom = async (code: string): Promise<GameRoom> => {
 };
 
 export const createRoom = async () => {
-  const code = randomUUID();
+  const code = murmurhash.v3(randomUUID());
   // const streamId = RoomStateStream(code);
   // const startEvent = { event: StreamStartEvent(code) };
   // await addStreamEntry(startEvent, streamId, true);
 
-  const newRoom = new GameRoom(code);
+  const newRoom = new GameRoom(`${code}`);
   rooms.push(newRoom);
   return newRoom;
 };

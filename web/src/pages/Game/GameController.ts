@@ -9,6 +9,7 @@ import { PlayerBoardInfoProps } from "../../components/PlayerBoardInfo";
 import { GameStateSummary as RemoteGameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 
 export interface GameControllerInterface {
+  roomCode: string;
   onStateUpdate?: (state: LocalGameState) => void;
   onEvent?: (event: any) => void;
   play(column: number): void;

@@ -2,6 +2,7 @@ var $1FMIp$express = require("express");
 var $1FMIp$cors = require("cors");
 var $1FMIp$socketio = require("socket.io");
 var $1FMIp$crypto = require("crypto");
+var $1FMIp$murmurhash = require("murmurhash");
 
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
@@ -319,6 +320,7 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
 }
 
 
+
 // const client = createClient({
 //   url: "",
 // });
@@ -355,11 +357,11 @@ const $c57c9ea430dd510b$export$ddb5e34974173ddf = async (code)=>{
     return room;
 };
 const $c57c9ea430dd510b$export$4a6fbf23fa252689 = async ()=>{
-    const code = (0, $1FMIp$crypto.randomUUID)();
+    const code = (0, ($parcel$interopDefault($1FMIp$murmurhash))).v3((0, $1FMIp$crypto.randomUUID)());
     // const streamId = RoomStateStream(code);
     // const startEvent = { event: StreamStartEvent(code) };
     // await addStreamEntry(startEvent, streamId, true);
-    const newRoom = new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)(code);
+    const newRoom = new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)(`${code}`);
     $c57c9ea430dd510b$var$rooms.push(newRoom);
     return newRoom;
 }; // export const getRoomPreviousStates = async (code: string, count: number) => {

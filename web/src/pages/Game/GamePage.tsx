@@ -10,6 +10,7 @@ const BoardContainer = styled.div`
   justify-content: center;
   gap: 100px;
   height: 100%;
+  margin-top: 40px;
 `
 
 const PlayerInfoContainer = styled.div<{ isOwnBoard: boolean }>`
@@ -18,12 +19,18 @@ const PlayerInfoContainer = styled.div<{ isOwnBoard: boolean }>`
   ${(p) => p.isOwnBoard ? "padding-top" : "padding-bottom"}: 200px
 `
 
+const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+`
+
 export const GamePage = () => {
   const { roomCode } = useParams()
   let controller = useRef<GameControllerInterface>()
 
   useEffect(() => {
-    // Run! Like go get some data from an API.
     controller.current = new GameController(roomCode ?? "0", "raph")
     controller.current.onStateUpdate = (state) => {
       setTurn(state.turn)
@@ -41,17 +48,19 @@ export const GamePage = () => {
   const [boards, setBoards] = useState<PlayerBoardState[]>([])
 
   return (
-    <BoardContainer>
-      <PlayerInfoContainer isOwnBoard={true}>
-        <PlayerBoardInfo  {...playerInfo} />
-      </PlayerInfoContainer>
-      <Board boardSize={3} boards={boards} turn={turn ?? "opponent"} onPlay={(index) => {
-        console.log(controller.current)
-        if (controller.current) controller.current.play(index);
-      }} />
-      <PlayerInfoContainer isOwnBoard={false}>
-        <PlayerBoardInfo  {...opponentInfo} />
-      </PlayerInfoContainer>
-    </BoardContainer>
+    <PageContainer>
+      Room Code: <strong>{controller.current?.roomCode}</strong>
+      < BoardContainer >
+        <PlayerInfoContainer isOwnBoard={true}>
+          <PlayerBoardInfo  {...playerInfo} />
+        </PlayerInfoContainer>
+        <Board boardSize={3} boards={boards} turn={turn ?? "opponent"} onPlay={(index) => {
+          if (controller.current) controller.current.play(index);
+        }} />
+        <PlayerInfoContainer isOwnBoard={false}>
+          <PlayerBoardInfo  {...opponentInfo} />
+        </PlayerInfoContainer>
+      </BoardContainer >
+    </ PageContainer>
   )
 }

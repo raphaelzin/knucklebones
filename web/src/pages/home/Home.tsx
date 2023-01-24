@@ -12,6 +12,7 @@ const HomeContainer = styled.div`
   flex-direction: column;
   padding: 20px;
   align-items: center;
+  gap: 24px;
 `
 
 const DefaultRulesContainer = styled.div`
@@ -30,7 +31,6 @@ const StyledRuleDescription = styled(RuleDescription)`
 const HomeOptionsContainer = styled.div`
   display: flex;
   gap: 20px;
-
 `
 
 const StyledHomeCard = styled(HomeCard)`
@@ -50,8 +50,11 @@ export const HomePage: FC = () => {
   }
 
   const joinRoom = (code: string) => {
-    // TODO: join room
-    console.log(code)
+    if (!code) {
+      alert("Invalid code")
+    } else {
+      navigate(`/games/${code}`)
+    }
   }
 
   return (
@@ -75,6 +78,7 @@ export const HomePage: FC = () => {
           <TextInput color="#0D6EFD" actionLabel="Join" submit={joinRoom} />
         </StyledHomeCard>
         <StyledHomeCard description="Spectate a game." emoji="👀">
+          <TextInput color="#198754" actionLabel="Spectate" submit={joinRoom} />
         </StyledHomeCard>
       </HomeOptionsContainer>
     </HomeContainer >

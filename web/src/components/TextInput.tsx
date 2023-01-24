@@ -7,7 +7,7 @@ interface TextInputProps {
   submit: (input: string) => void
 }
 
-const InputContainer = styled.div`
+const InputContainer = styled.form`
   border: 1px solid rgba(0,0,0,0.05);
   border-radius: 6px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -31,14 +31,13 @@ const TextInputStyle = styled.input`
 export const TextInput: FC<TextInputProps> = ({ color, actionLabel, submit }) => {
   const [input, setInput] = useState("");
 
-
   return (
     <InputContainer>
       <TextInputStyle placeholder="test" onChange={(event) => {
         event.preventDefault();
         setInput(event.target.value)
       }} />
-      <ActionButton color={color} title={actionLabel} onClick={(event) => {
+      <ActionButton type="submit" color={color} title={actionLabel} onClick={(event) => {
         event.preventDefault()
         submit(input)
       }}>
