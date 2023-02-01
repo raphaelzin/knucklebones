@@ -1,5 +1,6 @@
 /* eslint-disable no-throw-literal */
 import { RoomJoinResponse } from "@knucklebones/shared-models/src/RemoteResponses";
+import { Cookies } from "react-cookie";
 
 export const requestRoomCreation = async (): Promise<RoomJoinResponse> => {
   const response = await fetch("http://localhost:4000/game/create-game", {
@@ -18,7 +19,8 @@ export const requestRoomCreation = async (): Promise<RoomJoinResponse> => {
 };
 
 export const requestRoomPlayerSeat = async (
-  code: string
+  code: string,
+  token: string
 ): Promise<RoomJoinResponse> => {
   const response = await fetch("http://localhost:4000/game/join", {
     method: "POST",
@@ -26,7 +28,7 @@ export const requestRoomPlayerSeat = async (
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ nickname: "raphael", roomCode: code }),
+    body: JSON.stringify({ nickname: "raphael", roomCode: code, token }),
   });
 
   const body = await response.json();

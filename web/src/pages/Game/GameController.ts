@@ -35,7 +35,7 @@ export class GameController implements GameControllerInterface {
   constructor(roomCode: string, nickname: string) {
     this.cookies = new Cookies();
     this.roomCode = roomCode;
-    const token = this.cookies.get(`tokens-room-${this.roomCode}`);
+    const token = this.cookies.get(`token`);
 
     let query: any = { nickname, roomCode };
     if (token) {
@@ -64,14 +64,14 @@ export class GameController implements GameControllerInterface {
     this.socket.on("welcome", (args) => {
       this.token = args.token;
       this.id = args.id;
-      this.cookies.set(`tokens-room-${this.roomCode}`, args.token, {
+      this.cookies.set(`token`, args.token, {
         maxAge: 3600,
       });
     });
 
     this.socket.on("reconnect", (args) => {
       if (!args.success) {
-        this.cookies.remove(`tokens-room-${this.roomCode}`);
+        this.cookies.remove(`token`);
       }
       this.id = args.id;
     });

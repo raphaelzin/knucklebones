@@ -7,6 +7,7 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ServerEvent } from "./GameRoomEvents";
 import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
+import findIndex from "lodash/findIndex";
 
 type IOSocket = Socket<
   DefaultEventsMap,
@@ -67,29 +68,30 @@ export class GameRoom {
   // }
 
   playerConnect(socket: IOSocket, token: string) {
-    const filteredPlayers = this.players.filter(
-      (player) => player.token === token
-    );
+    this.handleReconnectRequest(socket, token);
+    // const index = findIndex(this.players, (player) => player.token === token);
+    // if (index == -1) {
+    //   this.emit(socket, {
+    //     kind: "error",
+    //     error: InvalidPayload("Invalid token"),
+    //   });
+    // }
 
-    if (filteredPlayers.length == 0) {
-      this.emit(socket, { kind: "error", error: FullHouseError });
-      socket.disconnect(true);
-    }
-    filteredPlayers[0].socket = socket;
-    this.setupListeners(socket);
+    // this.players[index] = { socket: socket, ...this.players[index] };
+
+    // this.setupListeners(socket);
   }
 
   registerPlayer(nickname: string): { id: string; token: string } {
     if (this.controller.gameIsFull()) throw FullHouseError;
     const id = randomUUID();
     const token = randomUUID();
-    console.log("will try to enter game");
+
     this.controller.enterGame(nickname, id);
-    console.log("entered the game");
     const client: GameRoomClient = { id, token };
-    console.log(`players: ${this.players}`);
     this.players.push(client);
-    console.log(`client: ${client}`);
+
+    console.log(JSON.stringify(this.players));
     return { id, token };
   }
 
@@ -129,6 +131,7 @@ export class GameRoom {
   }
 
   handleReconnectRequest(socket: IOSocket, token: string) {
+    console.log("Reconnecting user");
     const player = this.players.filter((p) => p.token == token)[0];
     if (!player) {
       this.emit(socket, {
@@ -159,6 +162,7 @@ export class GameRoom {
     for (const client of [...this.players, ...this.spectators]) {
       if (client.socket)
         this.emit(client.socket, { kind: "game-state-update", state });
+      else console.log(`client ${client.id} doesn't have a socket attached.`);
     }
   }
 }

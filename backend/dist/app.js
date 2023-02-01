@@ -235,31 +235,28 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
     //   // this.controller.enterGame(nickname, id);
     // }
     playerConnect(socket, token) {
-        const filteredPlayers = this.players.filter((player)=>player.token === token);
-        if (filteredPlayers.length == 0) {
-            this.emit(socket, {
-                kind: "error",
-                error: (0, $8925cb211138c4b2$export$31f1c7902a035837)
-            });
-            socket.disconnect(true);
-        }
-        filteredPlayers[0].socket = socket;
-        this.setupListeners(socket);
+        this.handleReconnectRequest(socket, token);
+    // const index = findIndex(this.players, (player) => player.token === token);
+    // if (index == -1) {
+    //   this.emit(socket, {
+    //     kind: "error",
+    //     error: InvalidPayload("Invalid token"),
+    //   });
+    // }
+    // this.players[index] = { socket: socket, ...this.players[index] };
+    // this.setupListeners(socket);
     }
     registerPlayer(nickname) {
         if (this.controller.gameIsFull()) throw 0, $8925cb211138c4b2$export$31f1c7902a035837;
         const id = (0, $1FMIp$crypto.randomUUID)();
         const token = (0, $1FMIp$crypto.randomUUID)();
-        console.log("will try to enter game");
         this.controller.enterGame(nickname, id);
-        console.log("entered the game");
         const client = {
             id: id,
             token: token
         };
-        console.log(`players: ${this.players}`);
         this.players.push(client);
-        console.log(`client: ${client}`);
+        console.log(JSON.stringify(this.players));
         return {
             id: id,
             token: token
@@ -305,6 +302,7 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         }
     }
     handleReconnectRequest(socket, token) {
+        console.log("Reconnecting user");
         const player = this.players.filter((p)=>p.token == token)[0];
         if (!player) {
             this.emit(socket, {
@@ -339,6 +337,7 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
             kind: "game-state-update",
             state: state
         });
+        else console.log(`client ${client.id} doesn't have a socket attached.`);
     }
 }
 
@@ -465,8 +464,9 @@ const $3f204e84b16f54c0$var$io = new (0, $1FMIp$socketio.Server)(4444, {
 });
 $3f204e84b16f54c0$var$io.of("/game/play").on("connection", async (socket)=>{
     const { roomCode: roomCode , nickname: nickname , token: token  } = socket.handshake.query;
-    if (!roomCode || !nickname) {
-        socket.emit("bye-bye", "Room code or nickname missing.");
+    console.log(roomCode, nickname, token);
+    if (!roomCode || !nickname || !token) {
+        socket.emit("bye-bye", "Room code, nickname or token missing missing.");
         socket.disconnect(true);
         return;
     }

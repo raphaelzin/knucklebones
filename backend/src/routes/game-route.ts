@@ -6,7 +6,10 @@ import {
   requestPlayerTicket,
 } from "../controllers/RoomService";
 import { GameRoom } from "../models/GameRoom/GameRoom";
-import { RoomJoinResponse } from "@knucklebones/shared-models/src/RemoteResponses";
+import {
+  PlayerTicket,
+  RoomJoinResponse,
+} from "@knucklebones/shared-models/src/RemoteResponses";
 
 export const router = express.Router();
 
@@ -20,7 +23,7 @@ router.post("/create-game", async (req: Request, res: Response) => {
   }
 
   let newRoom: GameRoom;
-  let playerTicket: { id: string; token: string };
+  let playerTicket: PlayerTicket;
   try {
     newRoom = await createRoom();
     playerTicket = await requestPlayerTicket(newRoom.code, nickname);
@@ -80,9 +83,9 @@ const io = new WebSocketServer(4444, {
 
 io.of("/game/play").on("connection", async (socket) => {
   const { roomCode, nickname, token } = socket.handshake.query;
-
-  if (!roomCode || !nickname) {
-    socket.emit("bye-bye", "Room code or nickname missing.");
+  console.log(roomCode, nickname, token);
+  if (!roomCode || !nickname || !token) {
+    socket.emit("bye-bye", "Room code, nickname or token missing missing.");
     socket.disconnect(true);
     return;
   }

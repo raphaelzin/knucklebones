@@ -57,7 +57,7 @@ export const HomePage: FC = () => {
   }
 
   const joinRoom = (code: string) => {
-    requestRoomPlayerSeat(code).then((response) => {
+    requestRoomPlayerSeat(code, tokenCookie.token).then((response) => {
       setIdCookie("id", response.ticket.id)
       setTokenCookie("token", response.ticket.token)
 
