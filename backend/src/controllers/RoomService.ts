@@ -58,9 +58,7 @@ export const createRoom = async () => {
   return newRoom;
 };
 
-// export const getRoomPreviousStates = async (code: string, count: number) => {
-//   const streamId = RoomStateStream(code);
-//   const result = await client.xRevRange(streamId, "+", "-", { COUNT: count });
-//   const messages = result.map((entry) => entry.message);
-//   return messages["state"];
-// };
+export const requestPlayerTicket = async (code: string, nickname: string) => {
+  const room = await getRoom(code);
+  return room.registerPlayer(nickname);
+};

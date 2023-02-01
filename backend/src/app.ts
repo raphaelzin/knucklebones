@@ -13,5 +13,5 @@ app.use(
 app.use("/game", gameRouter);
 
 app.listen(4000, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${6000}`);
+  console.log(`⚡️[server]: Server is running at https://localhost:${4000}`);
 });

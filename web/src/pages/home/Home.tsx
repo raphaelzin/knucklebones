@@ -5,7 +5,8 @@ import { Button } from "../../components/Button"
 import { HomeCard } from "../../components/HomeCard"
 import { RuleDescription } from "../../components/Rules/RuleDescription"
 import { TextInput } from "../../components/TextInput"
-import { requestRoomCreation } from "./HomeController"
+import { requestRoomCreation, requestRoomPlayerSeat } from "./HomeController"
+import { useCookies } from "react-cookie";
 
 const HomeContainer = styled.div`
   display: flex;
@@ -39,22 +40,31 @@ const StyledHomeCard = styled(HomeCard)`
 `
 
 export const HomePage: FC = () => {
+  const [idCookie, setIdCookie] = useCookies(["id"])
+  const [tokenCookie, setTokenCookie] = useCookies(["token"])
   const navigate = useNavigate();
 
+
   const handleRoomCreation = () => {
-    requestRoomCreation().then((code) => {
-      navigate(`/games/${code}`)
+    requestRoomCreation().then((response) => {
+      setIdCookie("id", response.ticket.id)
+      setTokenCookie("token", response.ticket.token)
+
+      navigate(`/games/${response.code}`)
     }, (error) => {
       alert(`error: ${JSON.stringify(error)}`)
     })
   }
 
   const joinRoom = (code: string) => {
-    if (!code) {
-      alert("Invalid code")
-    } else {
-      navigate(`/games/${code}`)
-    }
+    requestRoomPlayerSeat(code).then((response) => {
+      setIdCookie("id", response.ticket.id)
+      setTokenCookie("token", response.ticket.token)
+
+      navigate(`/games/${response.code}`)
+    }, (error) => {
+      alert(`error: ${JSON.stringify(error)}`)
+    })
   }
 
   return (

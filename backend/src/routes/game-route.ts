@@ -1,32 +1,73 @@
 import { Server as WebSocketServer } from "socket.io";
 import express, { Request, Response } from "express";
-import { createRoom, getRoom } from "../controllers/RoomService";
+import {
+  createRoom,
+  getRoom,
+  requestPlayerTicket,
+} from "../controllers/RoomService";
 import { GameRoom } from "../models/GameRoom/GameRoom";
+import { RoomJoinResponse } from "@knucklebones/shared-models/src/RemoteResponses";
 
 export const router = express.Router();
-router.use(express.json());
 
 router.post("/create-game", async (req: Request, res: Response) => {
-  if (!req.params) {
-    res.statusCode = 404;
+  const { nickname } = req.body;
+
+  if (!req.params || !nickname) {
+    res.statusCode = 400;
+    res.send({ code: "Nope" });
     return;
   }
 
   let newRoom: GameRoom;
+  let playerTicket: { id: string; token: string };
   try {
     newRoom = await createRoom();
+    playerTicket = await requestPlayerTicket(newRoom.code, nickname);
   } catch (error) {
-    res.statusCode = error.code;
+    res.statusCode = error.code ?? 500;
     res.send({ error, code: error.code });
     return;
   }
 
-  console.log(`Room created: ${newRoom.code}`);
+  const response: RoomJoinResponse = {
+    code: newRoom.code,
+    ticket: playerTicket,
+  };
+
   res.statusCode = 200;
   res.send({
-    data: {
-      code: newRoom.code,
-    },
+    data: response,
+  });
+});
+
+router.post("/join", async (req: Request, res: Response) => {
+  const { nickname, roomCode } = req.body;
+  if (!req.params || !nickname) {
+    res.statusCode = 400;
+    res.send({ code: "Nope" });
+    return;
+  }
+
+  let room: GameRoom;
+  let playerTicket: { id: string; token: string };
+  try {
+    room = await getRoom(roomCode);
+    playerTicket = await requestPlayerTicket(room.code, nickname);
+  } catch (error) {
+    res.statusCode = error.code ?? 500;
+    res.send({ error, code: error.code });
+    return;
+  }
+
+  const response: RoomJoinResponse = {
+    code: roomCode,
+    ticket: playerTicket,
+  };
+
+  res.statusCode = 200;
+  res.send({
+    data: response,
   });
 });
 
@@ -48,7 +89,7 @@ io.of("/game/play").on("connection", async (socket) => {
 
   try {
     const room = await getRoom(roomCode as string);
-    room.enterGame(socket, nickname as string, token as string | undefined);
+    room.playerConnect(socket, token as string);
   } catch (error) {
     socket.emit("bye-bye", `an error: ${error}`);
     socket.disconnect(true);

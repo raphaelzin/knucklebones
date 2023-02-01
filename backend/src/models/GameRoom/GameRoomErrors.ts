@@ -1,39 +1,39 @@
 // Play Errors
 export type ErrorDomain = "game" | "game-room";
 
-export interface GameError {
-  error: string;
+export interface GameError extends Error {
+  name: string;
   domain: ErrorDomain;
   debugMessage?: string;
   message: string;
 }
 
 export const ColumnFullError: GameError = {
-  error: "column-full",
+  name: "column-full",
   domain: "game",
   message: "The selected column is already full",
 };
 
 export const WrongTurnError: GameError = {
-  error: "wrong-player-turn",
+  name: "wrong-player-turn",
   domain: "game",
   message: "It is not your turn.",
 };
 
 export const InvalidMoveError: GameError = {
-  error: "invalid-move",
+  name: "invalid-move",
   domain: "game",
   message: "This is an invalid play",
 };
 
 export const InvalidColumn: GameError = {
-  error: "invalid-column",
+  name: "invalid-column",
   domain: "game",
   message: "The selected column is not valid.",
 };
 
 export const FullHouseError: GameError = {
-  error: "full-house",
+  name: "full-house",
   domain: "game",
   message: "This game is already full. Consider entering as a spectator",
 };
@@ -43,7 +43,7 @@ export const InvalidPayload = (
   debugMessage: string = undefined
 ): GameError => {
   return {
-    error: "invalid-payload",
+    name: "invalid-payload",
     domain: "game-room",
     message,
     debugMessage,

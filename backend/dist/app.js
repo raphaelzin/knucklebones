@@ -39,33 +39,33 @@ var $4b804b1cef173b97$export$2e2bcd8739ae039 = new $4b804b1cef173b97$var$DiceTow
 
 // Play Errors
 const $8925cb211138c4b2$export$12f3fca0ab75890f = {
-    error: "column-full",
+    name: "column-full",
     domain: "game",
     message: "The selected column is already full"
 };
 const $8925cb211138c4b2$export$3528e15a3aebe6cd = {
-    error: "wrong-player-turn",
+    name: "wrong-player-turn",
     domain: "game",
     message: "It is not your turn."
 };
 const $8925cb211138c4b2$export$61011c9359f9bd4a = {
-    error: "invalid-move",
+    name: "invalid-move",
     domain: "game",
     message: "This is an invalid play"
 };
 const $8925cb211138c4b2$export$982d9566950a5c3e = {
-    error: "invalid-column",
+    name: "invalid-column",
     domain: "game",
     message: "The selected column is not valid."
 };
 const $8925cb211138c4b2$export$31f1c7902a035837 = {
-    error: "full-house",
+    name: "full-house",
     domain: "game",
     message: "This game is already full. Consider entering as a spectator"
 };
 const $8925cb211138c4b2$export$18a9427d80c1a057 = (message, debugMessage)=>{
     return {
-        error: "invalid-payload",
+        name: "invalid-payload",
         domain: "game-room",
         message: message,
         debugMessage: debugMessage
@@ -210,37 +210,60 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         this.spectators = [];
         this.players = [];
     }
-    enterGame(socket, nickname, existingId) {
-        // If user already has an id, he's trying to reconnect.
-        if (existingId) {
-            this.handleReconnectRequest(socket, existingId);
-            return;
-        }
-        // if room is full, throw error so router can close socket.
-        if (this.controller.gameIsFull()) {
+    // enterGame(
+    //   socket: IOSocket,
+    //   nickname: string,
+    //   existingId: string | undefined
+    // ) {
+    //   // If user already has an id, he's trying to reconnect.
+    //   if (existingId) {
+    //     this.handleReconnectRequest(socket, existingId);
+    //     return;
+    //   }
+    //   // if room is full, throw error so router can close socket.
+    //   if (this.controller.gameIsFull()) {
+    //     this.emit(socket, { kind: "error", error: FullHouseError });
+    //     socket.disconnect(true);
+    //     return;
+    //   }
+    //   const id = randomUUID();
+    //   const token = randomUUID();
+    //   const client: GameRoomClient = { id, socket, token };
+    //   this.emit(socket, { kind: "welcome", id, token });
+    //   this.setupListeners(socket);
+    //   // this.players.push(client);
+    //   // this.controller.enterGame(nickname, id);
+    // }
+    playerConnect(socket, token) {
+        const filteredPlayers = this.players.filter((player)=>player.token === token);
+        if (filteredPlayers.length == 0) {
             this.emit(socket, {
                 kind: "error",
                 error: (0, $8925cb211138c4b2$export$31f1c7902a035837)
             });
             socket.disconnect(true);
-            return;
         }
+        filteredPlayers[0].socket = socket;
+        this.setupListeners(socket);
+    }
+    registerPlayer(nickname) {
+        if (this.controller.gameIsFull()) throw 0, $8925cb211138c4b2$export$31f1c7902a035837;
         const id = (0, $1FMIp$crypto.randomUUID)();
         const token = (0, $1FMIp$crypto.randomUUID)();
+        console.log("will try to enter game");
+        this.controller.enterGame(nickname, id);
+        console.log("entered the game");
         const client = {
             id: id,
-            socket: socket,
             token: token
         };
-        console.log(`token: ${token}`);
-        this.emit(socket, {
-            kind: "welcome",
+        console.log(`players: ${this.players}`);
+        this.players.push(client);
+        console.log(`client: ${client}`);
+        return {
             id: id,
             token: token
-        });
-        this.setupListeners(socket);
-        this.players.push(client);
-        this.controller.enterGame(nickname, id);
+        };
     }
     spectateGame(socket) {
         const id = (0, $1FMIp$crypto.randomUUID)();
@@ -312,7 +335,7 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         for (const client of [
             ...this.players,
             ...this.spectators
-        ])this.emit(client.socket, {
+        ])if (client.socket) this.emit(client.socket, {
             kind: "game-state-update",
             state: state
         });
@@ -364,38 +387,74 @@ const $c57c9ea430dd510b$export$4a6fbf23fa252689 = async ()=>{
     const newRoom = new (0, $c9b2dff07f2e6e1c$export$ddffd877baf3c775)(`${code}`);
     $c57c9ea430dd510b$var$rooms.push(newRoom);
     return newRoom;
-}; // export const getRoomPreviousStates = async (code: string, count: number) => {
- //   const streamId = RoomStateStream(code);
- //   const result = await client.xRevRange(streamId, "+", "-", { COUNT: count });
- //   const messages = result.map((entry) => entry.message);
- //   return messages["state"];
- // };
+};
+const $c57c9ea430dd510b$export$924ba676f7e3a2d = async (code, nickname)=>{
+    const room = await $c57c9ea430dd510b$export$ddb5e34974173ddf(code);
+    return room.registerPlayer(nickname);
+};
 
 
 const $3f204e84b16f54c0$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($1FMIp$express))).Router();
-$3f204e84b16f54c0$export$5375cda95f0b0eb4.use((0, ($parcel$interopDefault($1FMIp$express))).json());
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
-    if (!req.params) {
-        res.statusCode = 404;
+    const { nickname: nickname  } = req.body;
+    if (!req.params || !nickname) {
+        res.statusCode = 400;
+        res.send({
+            code: "Nope"
+        });
         return;
     }
     let newRoom;
+    let playerTicket;
     try {
         newRoom = await (0, $c57c9ea430dd510b$export$4a6fbf23fa252689)();
+        playerTicket = await (0, $c57c9ea430dd510b$export$924ba676f7e3a2d)(newRoom.code, nickname);
     } catch (error) {
-        res.statusCode = error.code;
+        res.statusCode = error.code ?? 500;
         res.send({
             error: error,
             code: error.code
         });
         return;
     }
-    console.log(`Room created: ${newRoom.code}`);
+    const response = {
+        code: newRoom.code,
+        ticket: playerTicket
+    };
     res.statusCode = 200;
     res.send({
-        data: {
-            code: newRoom.code
-        }
+        data: response
+    });
+});
+$3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/join", async (req, res)=>{
+    const { nickname: nickname , roomCode: roomCode  } = req.body;
+    if (!req.params || !nickname) {
+        res.statusCode = 400;
+        res.send({
+            code: "Nope"
+        });
+        return;
+    }
+    let room;
+    let playerTicket;
+    try {
+        room = await (0, $c57c9ea430dd510b$export$ddb5e34974173ddf)(roomCode);
+        playerTicket = await (0, $c57c9ea430dd510b$export$924ba676f7e3a2d)(room.code, nickname);
+    } catch (error) {
+        res.statusCode = error.code ?? 500;
+        res.send({
+            error: error,
+            code: error.code
+        });
+        return;
+    }
+    const response = {
+        code: roomCode,
+        ticket: playerTicket
+    };
+    res.statusCode = 200;
+    res.send({
+        data: response
     });
 });
 // TODO: use dotenv
@@ -413,7 +472,7 @@ $3f204e84b16f54c0$var$io.of("/game/play").on("connection", async (socket)=>{
     }
     try {
         const room = await (0, $c57c9ea430dd510b$export$ddb5e34974173ddf)(roomCode);
-        room.enterGame(socket, nickname, token);
+        room.playerConnect(socket, token);
     } catch (error) {
         socket.emit("bye-bye", `an error: ${error}`);
         socket.disconnect(true);
@@ -447,7 +506,7 @@ $9d7548254fcccc8a$var$app.use((0, ($parcel$interopDefault($1FMIp$cors)))({
 }));
 $9d7548254fcccc8a$var$app.use("/game", (0, $3f204e84b16f54c0$export$5375cda95f0b0eb4));
 $9d7548254fcccc8a$var$app.listen(4000, ()=>{
-    console.log(`⚡️[server]: Server is running at https://localhost:${6000}`);
+    console.log(`⚡️[server]: Server is running at https://localhost:${4000}`);
 });
 
 

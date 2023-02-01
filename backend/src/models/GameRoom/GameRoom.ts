@@ -16,7 +16,7 @@ type IOSocket = Socket<
 >;
 
 interface GameRoomClient {
-  socket: IOSocket;
+  socket?: IOSocket;
   token: string;
   id: string;
 }
@@ -38,33 +38,59 @@ export class GameRoom {
     this.players = [];
   }
 
-  enterGame(
-    socket: IOSocket,
-    nickname: string,
-    existingId: string | undefined
-  ) {
-    // If user already has an id, he's trying to reconnect.
-    if (existingId) {
-      this.handleReconnectRequest(socket, existingId);
-      return;
-    }
+  // enterGame(
+  //   socket: IOSocket,
+  //   nickname: string,
+  //   existingId: string | undefined
+  // ) {
+  //   // If user already has an id, he's trying to reconnect.
+  //   if (existingId) {
+  //     this.handleReconnectRequest(socket, existingId);
+  //     return;
+  //   }
 
-    // if room is full, throw error so router can close socket.
-    if (this.controller.gameIsFull()) {
+  //   // if room is full, throw error so router can close socket.
+  //   if (this.controller.gameIsFull()) {
+  //     this.emit(socket, { kind: "error", error: FullHouseError });
+  //     socket.disconnect(true);
+  //     return;
+  //   }
+
+  //   const id = randomUUID();
+  //   const token = randomUUID();
+  //   const client: GameRoomClient = { id, socket, token };
+  //   this.emit(socket, { kind: "welcome", id, token });
+  //   this.setupListeners(socket);
+
+  //   // this.players.push(client);
+  //   // this.controller.enterGame(nickname, id);
+  // }
+
+  playerConnect(socket: IOSocket, token: string) {
+    const filteredPlayers = this.players.filter(
+      (player) => player.token === token
+    );
+
+    if (filteredPlayers.length == 0) {
       this.emit(socket, { kind: "error", error: FullHouseError });
       socket.disconnect(true);
-      return;
     }
+    filteredPlayers[0].socket = socket;
+    this.setupListeners(socket);
+  }
 
+  registerPlayer(nickname: string): { id: string; token: string } {
+    if (this.controller.gameIsFull()) throw FullHouseError;
     const id = randomUUID();
     const token = randomUUID();
-    const client: GameRoomClient = { id, socket, token };
-    console.log(`token: ${token}`);
-    this.emit(socket, { kind: "welcome", id, token });
-    this.setupListeners(socket);
-
-    this.players.push(client);
+    console.log("will try to enter game");
     this.controller.enterGame(nickname, id);
+    console.log("entered the game");
+    const client: GameRoomClient = { id, token };
+    console.log(`players: ${this.players}`);
+    this.players.push(client);
+    console.log(`client: ${client}`);
+    return { id, token };
   }
 
   spectateGame(socket: IOSocket) {
@@ -131,7 +157,8 @@ export class GameRoom {
 
   handleGameStateChange(state: GameStateSummary) {
     for (const client of [...this.players, ...this.spectators]) {
-      this.emit(client.socket, { kind: "game-state-update", state });
+      if (client.socket)
+        this.emit(client.socket, { kind: "game-state-update", state });
     }
   }
 }
