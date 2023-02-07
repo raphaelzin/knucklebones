@@ -96,7 +96,7 @@ io.of("/game/play").on("connection", async (socket) => {
 
   try {
     const room = await getRoom(roomCode as string);
-    room.playerConnect(socket, token as string);
+    room.handleReconnectRequest(socket, token as string);
   } catch (error) {
     socket.emit("bye-bye", `an error: ${error}`);
     socket.disconnect(true);

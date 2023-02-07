@@ -1,6 +1,7 @@
 var $1FMIp$express = require("express");
 var $1FMIp$cors = require("cors");
 var $1FMIp$socketio = require("socket.io");
+var $1FMIp$pino = require("pino");
 var $1FMIp$crypto = require("crypto");
 var $1FMIp$murmurhash = require("murmurhash");
 
@@ -210,42 +211,6 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         this.spectators = [];
         this.players = [];
     }
-    // enterGame(
-    //   socket: IOSocket,
-    //   nickname: string,
-    //   existingId: string | undefined
-    // ) {
-    //   // If user already has an id, he's trying to reconnect.
-    //   if (existingId) {
-    //     this.handleReconnectRequest(socket, existingId);
-    //     return;
-    //   }
-    //   // if room is full, throw error so router can close socket.
-    //   if (this.controller.gameIsFull()) {
-    //     this.emit(socket, { kind: "error", error: FullHouseError });
-    //     socket.disconnect(true);
-    //     return;
-    //   }
-    //   const id = randomUUID();
-    //   const token = randomUUID();
-    //   const client: GameRoomClient = { id, socket, token };
-    //   this.emit(socket, { kind: "welcome", id, token });
-    //   this.setupListeners(socket);
-    //   // this.players.push(client);
-    //   // this.controller.enterGame(nickname, id);
-    // }
-    playerConnect(socket, token) {
-        this.handleReconnectRequest(socket, token);
-    // const index = findIndex(this.players, (player) => player.token === token);
-    // if (index == -1) {
-    //   this.emit(socket, {
-    //     kind: "error",
-    //     error: InvalidPayload("Invalid token"),
-    //   });
-    // }
-    // this.players[index] = { socket: socket, ...this.players[index] };
-    // this.setupListeners(socket);
-    }
     ticket(token) {
         const p = this.players.filter((p)=>p.token == token);
         if (p.length == 0) return undefined;
@@ -400,6 +365,8 @@ const $c57c9ea430dd510b$export$924ba676f7e3a2d = async (code, nickname)=>{
 };
 
 
+
+const $3f204e84b16f54c0$var$logger = (0, ($parcel$interopDefault($1FMIp$pino)))();
 const $3f204e84b16f54c0$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($1FMIp$express))).Router();
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
     const { nickname: nickname  } = req.body;
@@ -480,7 +447,7 @@ $3f204e84b16f54c0$var$io.of("/game/play").on("connection", async (socket)=>{
     }
     try {
         const room = await (0, $c57c9ea430dd510b$export$ddb5e34974173ddf)(roomCode);
-        room.playerConnect(socket, token);
+        room.handleReconnectRequest(socket, token);
     } catch (error) {
         socket.emit("bye-bye", `an error: ${error}`);
         socket.disconnect(true);

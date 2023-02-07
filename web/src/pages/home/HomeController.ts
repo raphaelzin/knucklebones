@@ -1,6 +1,5 @@
 /* eslint-disable no-throw-literal */
 import { RoomJoinResponse } from "@knucklebones/shared-models/src/RemoteResponses";
-import { Cookies } from "react-cookie";
 
 export const requestRoomCreation = async (): Promise<RoomJoinResponse> => {
   const response = await fetch("http://localhost:4000/game/create-game", {

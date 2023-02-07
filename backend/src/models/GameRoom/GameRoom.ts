@@ -7,7 +7,6 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ServerEvent } from "./GameRoomEvents";
 import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
-import findIndex from "lodash/findIndex";
 import { PlayerTicket } from "@knucklebones/shared-models/src/RemoteResponses";
 
 type IOSocket = Socket<
@@ -38,49 +37,6 @@ export class GameRoom {
 
     this.spectators = [];
     this.players = [];
-  }
-
-  // enterGame(
-  //   socket: IOSocket,
-  //   nickname: string,
-  //   existingId: string | undefined
-  // ) {
-  //   // If user already has an id, he's trying to reconnect.
-  //   if (existingId) {
-  //     this.handleReconnectRequest(socket, existingId);
-  //     return;
-  //   }
-
-  //   // if room is full, throw error so router can close socket.
-  //   if (this.controller.gameIsFull()) {
-  //     this.emit(socket, { kind: "error", error: FullHouseError });
-  //     socket.disconnect(true);
-  //     return;
-  //   }
-
-  //   const id = randomUUID();
-  //   const token = randomUUID();
-  //   const client: GameRoomClient = { id, socket, token };
-  //   this.emit(socket, { kind: "welcome", id, token });
-  //   this.setupListeners(socket);
-
-  //   // this.players.push(client);
-  //   // this.controller.enterGame(nickname, id);
-  // }
-
-  playerConnect(socket: IOSocket, token: string) {
-    this.handleReconnectRequest(socket, token);
-    // const index = findIndex(this.players, (player) => player.token === token);
-    // if (index == -1) {
-    //   this.emit(socket, {
-    //     kind: "error",
-    //     error: InvalidPayload("Invalid token"),
-    //   });
-    // }
-
-    // this.players[index] = { socket: socket, ...this.players[index] };
-
-    // this.setupListeners(socket);
   }
 
   ticket(token: string): PlayerTicket | undefined {
