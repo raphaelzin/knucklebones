@@ -45,7 +45,7 @@ router.post("/create-game", async (req: Request, res: Response) => {
 });
 
 router.post("/join", async (req: Request, res: Response) => {
-  const { nickname, roomCode } = req.body;
+  const { nickname, roomCode, token } = req.body;
   if (!req.params || !nickname) {
     res.statusCode = 400;
     res.send({ code: "Nope" });
@@ -56,8 +56,12 @@ router.post("/join", async (req: Request, res: Response) => {
   let playerTicket: { id: string; token: string };
   try {
     room = await getRoom(roomCode);
-    playerTicket = await requestPlayerTicket(room.code, nickname);
+    playerTicket = room.ticket(token);
+    if (!playerTicket) {
+      playerTicket = await requestPlayerTicket(room.code, nickname);
+    }
   } catch (error) {
+    console.log(error.stack);
     res.statusCode = error.code ?? 500;
     res.send({ error, code: error.code });
     return;
@@ -82,9 +86,9 @@ const io = new WebSocketServer(4444, {
 });
 
 io.of("/game/play").on("connection", async (socket) => {
-  const { roomCode, nickname, token } = socket.handshake.query;
-  console.log(roomCode, nickname, token);
-  if (!roomCode || !nickname || !token) {
+  const { roomCode, token } = socket.handshake.query;
+
+  if (!roomCode || !token) {
     socket.emit("bye-bye", "Room code, nickname or token missing missing.");
     socket.disconnect(true);
     return;

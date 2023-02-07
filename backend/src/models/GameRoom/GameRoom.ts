@@ -8,6 +8,7 @@ import { ServerEvent } from "./GameRoomEvents";
 import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
 import findIndex from "lodash/findIndex";
+import { PlayerTicket } from "@knucklebones/shared-models/src/RemoteResponses";
 
 type IOSocket = Socket<
   DefaultEventsMap,
@@ -82,6 +83,12 @@ export class GameRoom {
     // this.setupListeners(socket);
   }
 
+  ticket(token: string): PlayerTicket | undefined {
+    const p = this.players.filter((p) => p.token == token);
+    if (p.length == 0) return undefined;
+    return { token: token, id: p[0].id };
+  }
+
   registerPlayer(nickname: string): { id: string; token: string } {
     if (this.controller.gameIsFull()) throw FullHouseError;
     const id = randomUUID();
@@ -91,7 +98,6 @@ export class GameRoom {
     const client: GameRoomClient = { id, token };
     this.players.push(client);
 
-    console.log(JSON.stringify(this.players));
     return { id, token };
   }
 

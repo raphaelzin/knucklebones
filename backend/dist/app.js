@@ -246,6 +246,14 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
     // this.players[index] = { socket: socket, ...this.players[index] };
     // this.setupListeners(socket);
     }
+    ticket(token) {
+        const p = this.players.filter((p)=>p.token == token);
+        if (p.length == 0) return undefined;
+        return {
+            token: token,
+            id: p[0].id
+        };
+    }
     registerPlayer(nickname) {
         if (this.controller.gameIsFull()) throw 0, $8925cb211138c4b2$export$31f1c7902a035837;
         const id = (0, $1FMIp$crypto.randomUUID)();
@@ -256,7 +264,6 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
             token: token
         };
         this.players.push(client);
-        console.log(JSON.stringify(this.players));
         return {
             id: id,
             token: token
@@ -375,7 +382,7 @@ const $c57c9ea430dd510b$export$ddb5e34974173ddf = async (code)=>{
     //     throw "room not found";
     //   }
     const room = $c57c9ea430dd510b$var$rooms.filter((room)=>room.code === code)[0];
-    if (!room) throw "room not found";
+    if (!room) throw `room with code ${code} not found`;
     return room;
 };
 const $c57c9ea430dd510b$export$4a6fbf23fa252689 = async ()=>{
@@ -426,7 +433,7 @@ $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=
     });
 });
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/join", async (req, res)=>{
-    const { nickname: nickname , roomCode: roomCode  } = req.body;
+    const { nickname: nickname , roomCode: roomCode , token: token  } = req.body;
     if (!req.params || !nickname) {
         res.statusCode = 400;
         res.send({
@@ -438,8 +445,10 @@ $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/join", async (req, res)=>{
     let playerTicket;
     try {
         room = await (0, $c57c9ea430dd510b$export$ddb5e34974173ddf)(roomCode);
-        playerTicket = await (0, $c57c9ea430dd510b$export$924ba676f7e3a2d)(room.code, nickname);
+        playerTicket = room.ticket(token);
+        if (!playerTicket) playerTicket = await (0, $c57c9ea430dd510b$export$924ba676f7e3a2d)(room.code, nickname);
     } catch (error) {
+        console.log(error.stack);
         res.statusCode = error.code ?? 500;
         res.send({
             error: error,
@@ -463,9 +472,8 @@ const $3f204e84b16f54c0$var$io = new (0, $1FMIp$socketio.Server)(4444, {
     }
 });
 $3f204e84b16f54c0$var$io.of("/game/play").on("connection", async (socket)=>{
-    const { roomCode: roomCode , nickname: nickname , token: token  } = socket.handshake.query;
-    console.log(roomCode, nickname, token);
-    if (!roomCode || !nickname || !token) {
+    const { roomCode: roomCode , token: token  } = socket.handshake.query;
+    if (!roomCode || !token) {
         socket.emit("bye-bye", "Room code, nickname or token missing missing.");
         socket.disconnect(true);
         return;

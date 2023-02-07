@@ -42,7 +42,7 @@ export const getRoom = async (code: string): Promise<GameRoom> => {
   //   }
 
   const room = rooms.filter((room) => room.code === code)[0];
-  if (!room) throw "room not found";
+  if (!room) throw `room with code ${code} not found`;
 
   return room;
 };
