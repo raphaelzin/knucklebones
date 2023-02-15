@@ -1,14 +1,16 @@
 /* eslint-disable no-throw-literal */
 import { RoomJoinResponse } from "@knucklebones/shared-models/src/RemoteResponses";
 
-export const requestRoomCreation = async (): Promise<RoomJoinResponse> => {
+export const requestRoomCreation = async (
+  nickname: string
+): Promise<RoomJoinResponse> => {
   const response = await fetch("http://localhost:4000/game/create-game", {
     method: "POST",
     mode: "cors",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ nickname: "raphael" }),
+    body: JSON.stringify({ nickname }),
   });
 
   const body = await response.json();
@@ -19,7 +21,8 @@ export const requestRoomCreation = async (): Promise<RoomJoinResponse> => {
 
 export const requestRoomPlayerSeat = async (
   code: string,
-  token: string
+  token: string,
+  nickname: string
 ): Promise<RoomJoinResponse> => {
   const response = await fetch("http://localhost:4000/game/join", {
     method: "POST",
@@ -27,7 +30,7 @@ export const requestRoomPlayerSeat = async (
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ nickname: "raphael", roomCode: code, token }),
+    body: JSON.stringify({ nickname, roomCode: code, token }),
   });
 
   const body = await response.json();

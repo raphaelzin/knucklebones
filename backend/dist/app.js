@@ -1,7 +1,6 @@
 var $1FMIp$express = require("express");
 var $1FMIp$cors = require("cors");
 var $1FMIp$socketio = require("socket.io");
-var $1FMIp$pino = require("pino");
 var $1FMIp$crypto = require("crypto");
 var $1FMIp$murmurhash = require("murmurhash");
 
@@ -365,8 +364,6 @@ const $c57c9ea430dd510b$export$924ba676f7e3a2d = async (code, nickname)=>{
 };
 
 
-
-const $3f204e84b16f54c0$var$logger = (0, ($parcel$interopDefault($1FMIp$pino)))();
 const $3f204e84b16f54c0$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($1FMIp$express))).Router();
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
     const { nickname: nickname  } = req.body;

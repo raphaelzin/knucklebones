@@ -1,12 +1,11 @@
-import { FC } from "react"
+import { FC, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import styled from "styled-components"
-import { Button } from "../../components/Button"
 import { HomeCard } from "../../components/HomeCard"
 import { RuleDescription } from "../../components/Rules/RuleDescription"
-import { TextInput } from "../../components/TextInput"
 import { requestRoomCreation, requestRoomPlayerSeat } from "./HomeController"
 import { useCookies } from "react-cookie";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material"
 
 const HomeContainer = styled.div`
   display: flex;
@@ -40,13 +39,16 @@ const StyledHomeCard = styled(HomeCard)`
 `
 
 export const HomePage: FC = () => {
-  const [idCookie, setIdCookie] = useCookies(["id"])
+  const [, setIdCookie] = useCookies(["id"])
   const [tokenCookie, setTokenCookie] = useCookies(["token"])
+  const [nicknameCookie,] = useCookies(["nickname"])
+
   const navigate = useNavigate();
+  const [roomCode, setRoomCode] = useState("")
 
 
   const handleRoomCreation = () => {
-    requestRoomCreation().then((response) => {
+    requestRoomCreation(nicknameCookie.nickname ?? "").then((response) => {
       setIdCookie("id", response.ticket.id)
       setTokenCookie("token", response.ticket.token)
 
@@ -57,7 +59,7 @@ export const HomePage: FC = () => {
   }
 
   const joinRoom = (code: string) => {
-    requestRoomPlayerSeat(code, tokenCookie.token).then((response) => {
+    requestRoomPlayerSeat(code, tokenCookie.token, nicknameCookie.nickname ?? "").then((response) => {
       setIdCookie("id", response.ticket.id)
       setTokenCookie("token", response.ticket.token)
 
@@ -66,6 +68,9 @@ export const HomePage: FC = () => {
       alert(`error: ${JSON.stringify(error)}`)
     })
   }
+
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [spectateDialogOpen, setSpectateDialogOpen] = useState(false);
 
   return (
     <HomeContainer>
@@ -82,13 +87,61 @@ export const HomePage: FC = () => {
 
       <HomeOptionsContainer>
         <StyledHomeCard description="Create a game others can join." emoji="🎲">
-          <Button title="Create game" onClick={handleRoomCreation} />
+          <Button variant="contained" onClick={handleRoomCreation}>Create game</Button>
         </StyledHomeCard>
         <StyledHomeCard description="Join an existing game." emoji="🤝">
-          <TextInput color="#0D6EFD" actionLabel="Join" submit={joinRoom} />
+          <Button variant="contained" color="success" onClick={() => setJoinDialogOpen(true)}>Join Game</Button>
+          <Dialog open={joinDialogOpen} onClose={() => setJoinDialogOpen(false)}>
+            <DialogTitle>Join Game</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Enter the ID of the room. You're gonna take a player seat if one is available.
+              </DialogContentText>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="name"
+                label="Room ID"
+                fullWidth
+                variant="standard"
+                value={roomCode}
+                onChange={(e) => {
+                  setRoomCode(e.target.value)
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setJoinDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => joinRoom(roomCode)} >Join</Button>
+            </DialogActions>
+          </Dialog>
         </StyledHomeCard>
         <StyledHomeCard description="Spectate a game." emoji="👀">
-          <TextInput color="#198754" actionLabel="Spectate" submit={joinRoom} />
+          <Button onClick={() => setSpectateDialogOpen(true)} variant="contained" color="warning">Spectate a game</Button>
+          <Dialog open={spectateDialogOpen} onClose={() => setSpectateDialogOpen(false)}>
+            <DialogTitle>Spectate Game</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Enter the ID of the room. You'll be placed in the room as a spectator.
+              </DialogContentText>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="name"
+                label="Room ID"
+                fullWidth
+                variant="standard"
+                value={roomCode}
+                onChange={(e) => {
+                  setRoomCode(e.target.value)
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setSpectateDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => console.log("To do")} >Join</Button>
+            </DialogActions>
+          </Dialog>
         </StyledHomeCard>
       </HomeOptionsContainer>
     </HomeContainer >
