@@ -1,3 +1,4 @@
+import { Card } from "@mui/material"
 import { FC, ReactNode } from "react"
 import styled from "styled-components"
 
@@ -8,7 +9,7 @@ export interface HomeCardProps {
   emoji: string
 }
 
-const StyledCard = styled.div`
+const StyledCard = styled(Card)`
   display: flex;
   gap: 10px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -29,6 +30,7 @@ const StyledEmoji = styled.div`
 
 export const HomeCard: FC<HomeCardProps> = ({ description, emoji, children, className }) => {
   return (
+
     <StyledCard className={className}>
       <StyledEmoji>
         {emoji}

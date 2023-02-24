@@ -1,25 +1,31 @@
-import { FC, ReactNode, useState } from "react";
+import { FC, ReactNode, useContext, useState } from "react";
 import { useCookies } from "react-cookie";
 import styled from "styled-components";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Icon, TextField } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Switch, TextField, ToggleButton } from "@mui/material";
 import { EditOutlined } from "@mui/icons-material";
+import { ThemeContext } from "../App";
+import { Theme } from "../style/theme";
 
 export interface MainLayoutProps {
   children: ReactNode
 }
 
-const Header = styled.div`
+const Header = styled.div<{ theme: Theme }>`
   height: 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0px 5px 6px #00000022;
+  background-color: ${(p) => p.theme.backgroundColor};
+  color: ${(p) => p.theme.textColor};
 `
 
 const LayoutContainer = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: ${(p) => p.theme.backgroundColor};
+  color: ${(p) => p.theme.textColor};
 `;
 
 const NicknameContainer = styled.div`
@@ -81,10 +87,19 @@ const NicknameEditor: FC = () => {
 }
 
 export const MainLayout: FC<MainLayoutProps> = ({ children }) => {
+  const { theme, toggleTheme } = useContext(ThemeContext)
+  const [checked, setChecked] = useState(true);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked);
+    toggleTheme()
+  };
+
   return (
-    <LayoutContainer>
-      <Header>
+    <LayoutContainer theme={theme}>
+      <Header >
         <h1> Knucklebones </h1>
+        <Switch checked={checked} onChange={handleChange} />
         <NicknameEditor />
       </Header>
       {children}

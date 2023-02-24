@@ -1,4 +1,4 @@
-import { FC, useState } from "react"
+import { FC, useContext, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import styled from "styled-components"
 import { HomeCard } from "../../components/HomeCard"
@@ -6,6 +6,8 @@ import { RuleDescription } from "../../components/Rules/RuleDescription"
 import { requestRoomCreation, requestRoomPlayerSeat } from "./HomeController"
 import { useCookies } from "react-cookie";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material"
+import { Theme } from "../../style/theme"
+import { ThemeContext } from "../../App"
 
 const HomeContainer = styled.div`
   display: flex;
@@ -13,9 +15,11 @@ const HomeContainer = styled.div`
   padding: 20px;
   align-items: center;
   gap: 24px;
+  background-color: ${(p) => p.theme.backgroundColor};
+  color: ${(p) => p.theme.textColor};
 `
 
-const DefaultRulesContainer = styled.div`
+const DefaultRulesContainer = styled.div<{ theme: Theme }>`
   display: flex;
   gap: 80px;
   align-items: flex-end;
@@ -42,6 +46,7 @@ export const HomePage: FC = () => {
   const [, setIdCookie] = useCookies(["id"])
   const [tokenCookie, setTokenCookie] = useCookies(["token"])
   const [nicknameCookie,] = useCookies(["nickname"])
+  const { theme } = useContext(ThemeContext)
 
   const navigate = useNavigate();
   const [roomCode, setRoomCode] = useState("")
@@ -73,7 +78,7 @@ export const HomePage: FC = () => {
   const [spectateDialogOpen, setSpectateDialogOpen] = useState(false);
 
   return (
-    <HomeContainer>
+    <HomeContainer theme={theme}>
       <h2>How to play</h2>
       <DefaultRulesContainer>
         <>
