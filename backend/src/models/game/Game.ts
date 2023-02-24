@@ -1,4 +1,4 @@
-import { Rules } from "../rules/Rules";
+import { Rules } from "@knucklebones/shared-models/src/Rules";
 import {
   BoardState,
   PlayerBoardState,

@@ -62,7 +62,12 @@ export class GameRoom {
     const token = randomUUID();
     const client: GameRoomClient = { id, socket, token };
 
-    this.emit(socket, { kind: "welcome", id, token });
+    this.emit(socket, {
+      kind: "welcome",
+      id,
+      token,
+      rules: this.controller.game.rules,
+    });
     this.spectators.push(client);
   }
 
@@ -99,6 +104,7 @@ export class GameRoom {
       this.emit(socket, {
         kind: "reconnect",
         success: false,
+        rules: this.controller.game.rules,
         error: `No player with token "${token}" in this room.`,
       });
       return;
@@ -109,7 +115,12 @@ export class GameRoom {
 
     // Confirm reconnection.
     this.setupListeners(socket);
-    this.emit(socket, { kind: "reconnect", success: true, id: player.id });
+    this.emit(socket, {
+      kind: "reconnect",
+      success: true,
+      id: player.id,
+      rules: this.controller.game.rules,
+    });
     this.emit(socket, {
       kind: "game-state-update",
       state: this.controller.gameStateSummary,

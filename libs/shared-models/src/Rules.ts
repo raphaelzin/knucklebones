@@ -1,4 +1,4 @@
-import { Game } from "../game/Game";
+import { Game } from "../../../backend/src/models/game/Game";
 
 export interface Rules {
   boardSize: number;

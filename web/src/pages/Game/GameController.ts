@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { Cookies } from "react-cookie";
+import { Rules } from "@knucklebones/shared-models/src/Rules";
 
 import {
   PlayerBoardState as LocalPlayerBoardState,
@@ -10,6 +11,7 @@ import { GameStateSummary as RemoteGameStateSummary } from "@knucklebones/shared
 
 export interface GameControllerInterface {
   roomCode: string;
+  rules?: Rules;
   onStateUpdate?: (state: LocalGameState) => void;
   onEvent?: (event: any) => void;
   play(column: number): void;
@@ -28,6 +30,7 @@ export class GameController implements GameControllerInterface {
   socket: Socket;
   cookies: Cookies;
 
+  rules?: Rules;
   roomCode: string;
   token?: string;
   id?: string;
@@ -63,6 +66,7 @@ export class GameController implements GameControllerInterface {
 
     this.socket.on("welcome", (args) => {
       this.token = args.token;
+      this.rules = args.rules;
       this.id = args.id;
       this.cookies.set(`token`, args.token, {
         maxAge: 3600,
@@ -74,6 +78,7 @@ export class GameController implements GameControllerInterface {
         this.cookies.remove(`token`);
       }
       this.id = args.id;
+      this.rules = args.rules;
     });
 
     this.socket.on("game-state-update", (args) => {

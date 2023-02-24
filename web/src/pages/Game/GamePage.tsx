@@ -50,11 +50,11 @@ export const GamePage = () => {
   return (
     <PageContainer>
       Room Code: <strong>{controller.current?.roomCode}</strong>
-      < BoardContainer >
+      <BoardContainer>
         <PlayerInfoContainer isOwnBoard={true}>
-          <PlayerBoardInfo  {...playerInfo} />
+          <PlayerBoardInfo {...playerInfo} />
         </PlayerInfoContainer>
-        <Board boardSize={3} boards={boards} turn={turn ?? "opponent"} onPlay={(index) => {
+        <Board boardSize={controller.current?.rules?.boardSize ?? 3} boards={boards} turn={turn ?? "opponent"} onPlay={(index) => {
           if (controller.current) controller.current.play(index);
         }} />
         <PlayerInfoContainer isOwnBoard={false}>

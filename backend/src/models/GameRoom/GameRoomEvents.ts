@@ -1,4 +1,5 @@
 import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
+import { Rules } from "@knucklebones/shared-models/src/Rules";
 import { GameError } from "./GameRoomErrors";
 
 export type GameRoomEventKind =
@@ -16,6 +17,7 @@ export interface WelcomeEvent {
   kind: GameRoomEventKind;
   id: string;
   token: string;
+  rules: Rules;
 }
 
 /**
@@ -32,6 +34,7 @@ export interface ReconnectRequestEvent {
 export interface ReconnectResponseEvent {
   kind: GameRoomEventKind;
   success: boolean;
+  rules: Rules;
   error?: string;
 }
 

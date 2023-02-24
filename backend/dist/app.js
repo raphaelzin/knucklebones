@@ -164,7 +164,7 @@ class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
 
 
 class $e21924dae8dc3455$var$DefaultRules {
-    boardSize = 3;
+    boardSize = 4;
     dieSideCount = 6;
     numberOfPlayers = 2;
     evaluateGameEnd(game) {
@@ -244,7 +244,8 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         this.emit(socket, {
             kind: "welcome",
             id: id,
-            token: token
+            token: token,
+            rules: this.controller.game.rules
         });
         this.spectators.push(client);
     }
@@ -279,6 +280,7 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
             this.emit(socket, {
                 kind: "reconnect",
                 success: false,
+                rules: this.controller.game.rules,
                 error: `No player with token "${token}" in this room.`
             });
             return;
@@ -290,7 +292,8 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         this.emit(socket, {
             kind: "reconnect",
             success: true,
-            id: player.id
+            id: player.id,
+            rules: this.controller.game.rules
         });
         this.emit(socket, {
             kind: "game-state-update",
