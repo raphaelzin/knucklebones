@@ -10,6 +10,7 @@ import {
   PlayerTicket,
   RoomJoinResponse,
 } from "@knucklebones/shared-models/src/RemoteResponses";
+import { InvalidPayload } from "../models/GameRoom/GameRoomErrors";
 
 export const router = express.Router();
 
@@ -18,7 +19,12 @@ router.post("/create-game", async (req: Request, res: Response) => {
 
   if (!req.params || !nickname) {
     res.statusCode = 400;
-    res.send({ code: "Nope" });
+    res.send(
+      InvalidPayload(
+        "Missing nickname",
+        `params: ${JSON.stringify(req.params)}`
+      )
+    );
     return;
   }
 

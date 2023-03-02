@@ -164,7 +164,7 @@ class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
 
 
 class $e21924dae8dc3455$var$DefaultRules {
-    boardSize = 4;
+    boardSize = 3;
     dieSideCount = 6;
     numberOfPlayers = 2;
     evaluateGameEnd(game) {
@@ -367,14 +367,13 @@ const $c57c9ea430dd510b$export$924ba676f7e3a2d = async (code, nickname)=>{
 };
 
 
+
 const $3f204e84b16f54c0$export$5375cda95f0b0eb4 = (0, ($parcel$interopDefault($1FMIp$express))).Router();
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=>{
     const { nickname: nickname  } = req.body;
     if (!req.params || !nickname) {
         res.statusCode = 400;
-        res.send({
-            code: "Nope"
-        });
+        res.send((0, $8925cb211138c4b2$export$18a9427d80c1a057)("Missing nickname", `params: ${JSON.stringify(req.params)}`));
         return;
     }
     let newRoom;

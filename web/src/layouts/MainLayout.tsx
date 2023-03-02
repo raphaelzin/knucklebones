@@ -1,7 +1,7 @@
 import { FC, ReactNode, useContext, useState } from "react";
 import { useCookies } from "react-cookie";
 import styled from "styled-components";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Switch, TextField, ToggleButton } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Switch, TextField } from "@mui/material";
 import { EditOutlined } from "@mui/icons-material";
 import { ThemeContext } from "../App";
 import { Theme } from "../style/theme";
@@ -18,6 +18,7 @@ const Header = styled.div<{ theme: Theme }>`
   box-shadow: 0px 5px 6px #00000022;
   background-color: ${(p) => p.theme.backgroundColor};
   color: ${(p) => p.theme.textColor};
+  padding: 0 16px;
 `
 
 const LayoutContainer = styled.div`
@@ -40,12 +41,11 @@ const NicknameEditor: FC = () => {
   const onSave = () => {
     setEditNicknameOpen(false)
     setNicknameCookie("nickname", nickname)
-    setNickname("")
   }
 
   const onClose = () => {
     setEditNicknameOpen(false)
-    setNickname("")
+    setNickname(cookie.nickname)
   }
 
   return (
@@ -87,19 +87,13 @@ const NicknameEditor: FC = () => {
 }
 
 export const MainLayout: FC<MainLayoutProps> = ({ children }) => {
-  const { theme, toggleTheme } = useContext(ThemeContext)
-  const [checked, setChecked] = useState(true);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
-    toggleTheme()
-  };
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   return (
     <LayoutContainer theme={theme}>
-      <Header >
+      <Header>
         <h1> Knucklebones </h1>
-        <Switch checked={checked} onChange={handleChange} />
+        <Switch checked={theme.name === "dark"} onChange={toggleTheme} />
         <NicknameEditor />
       </Header>
       {children}

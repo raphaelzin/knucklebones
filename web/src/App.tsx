@@ -1,6 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@mui/system';
 import { createContext, useState } from 'react';
+import { useCookies } from 'react-cookie';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
 import './App.css';
@@ -32,13 +33,15 @@ const StyledApp = styled.div`
 `
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-
-  const theme: Theme = getTheme(isDarkMode);
+  const [cookies, setCookies] = useCookies()
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(cookies.isDarkMode ?? false);
 
   const toggleTheme = () => {
     setIsDarkMode((prevMode) => !prevMode);
+    setCookies("isDarkMode", isDarkMode);
   };
+
+  const theme: Theme = getTheme(isDarkMode);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }} >

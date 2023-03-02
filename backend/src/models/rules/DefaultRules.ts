@@ -2,7 +2,7 @@ import { Game } from "../game/Game";
 import { Rules } from "@knucklebones/shared-models/src/Rules";
 
 class DefaultRules implements Rules {
-  boardSize = 4;
+  boardSize = 3;
   dieSideCount = 6;
   numberOfPlayers = 2;
 
