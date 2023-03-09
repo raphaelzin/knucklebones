@@ -69,6 +69,10 @@ export class GameRoom {
       rules: this.controller.game.rules,
     });
     this.spectators.push(client);
+    this.emit(socket, {
+      kind: "game-state-update",
+      state: this.controller.gameStateSummary,
+    });
   }
 
   setupListeners(socket: IOSocket) {

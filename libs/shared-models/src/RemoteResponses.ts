@@ -21,3 +21,7 @@ export interface DefaultResponse<T, E> {
   data: T;
   error?: E;
 }
+
+export interface RoomSpectateResponse {
+  code: string;
+}

@@ -1,9 +1,11 @@
+import { GameState } from "@knucklebones/shared-models/src/RemoteState";
+import { Button } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Board, PlayerBoardState, Turn } from "../../components/Board/Board";
 import { PlayerBoardInfo, PlayerBoardInfoProps } from "../../components/PlayerBoardInfo";
-import { GameController, GameControllerInterface } from "./GameController";
+import { GameController, GameControllerInterface, LocalGameState } from "./GameController";
 
 const BoardContainer = styled.div`
   display: flex;
@@ -14,7 +16,8 @@ const BoardContainer = styled.div`
 `
 
 const PlayerInfoContainer = styled.div<{ isOwnBoard: boolean }>`
-  display: inline;
+  display: flex;
+  flex-direction: column;
   align-self: center;
   ${(p) => p.isOwnBoard ? "padding-top" : "padding-bottom"}: 200px
 `
@@ -29,9 +32,13 @@ const PageContainer = styled.div`
 export const GamePage = () => {
   const { roomCode } = useParams()
   let controller = useRef<GameControllerInterface>()
+  const [gameState, setGameState] = useState<GameState | undefined>()
+
+  const locationState = useLocation().state
+  const isSpectating = locationState?.isSpectating ?? false
 
   useEffect(() => {
-    controller.current = new GameController(roomCode ?? "0", "raph")
+    controller.current = new GameController(roomCode ?? "0", "raph", isSpectating)
     controller.current.onStateUpdate = (state) => {
       setTurn(state.turn)
       setBoards(state.boards)
@@ -39,7 +46,7 @@ export const GamePage = () => {
       setOpponentInfo(state.opponentInfo)
       setPlayerInfo(state.playerInfo)
     }
-  }, [roomCode]);
+  }, [roomCode, isSpectating]);
 
   const [opponentInfo, setOpponentInfo] = useState<PlayerBoardInfoProps>()
   const [playerInfo, setPlayerInfo] = useState<PlayerBoardInfoProps>()
@@ -51,14 +58,17 @@ export const GamePage = () => {
     <PageContainer>
       Room Code: <strong>{controller.current?.roomCode}</strong>
       <BoardContainer>
-        <PlayerInfoContainer isOwnBoard={true}>
-          <PlayerBoardInfo {...playerInfo} />
+        <PlayerInfoContainer isOwnBoard={!isSpectating}>
+
+          <PlayerBoardInfo {...playerInfo} isTopBoard={false} />
+          <Button size="large">🎉</Button>
         </PlayerInfoContainer>
         <Board boardSize={controller.current?.rules?.boardSize ?? 3} boards={boards} turn={turn ?? "opponent"} onPlay={(index) => {
           if (controller.current) controller.current.play(index);
         }} />
         <PlayerInfoContainer isOwnBoard={false}>
-          <PlayerBoardInfo  {...opponentInfo} />
+          <Button size="large">🎉</Button>
+          <PlayerBoardInfo  {...opponentInfo} isTopBoard={true} />
         </PlayerInfoContainer>
       </BoardContainer >
     </ PageContainer>

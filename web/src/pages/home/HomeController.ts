@@ -4,6 +4,7 @@ import {
   ResponseError,
   RoomCreationResponse,
   RoomJoinResponse,
+  RoomSpectateResponse,
 } from "@knucklebones/shared-models/src/RemoteResponses";
 import axios from "axios";
 
@@ -45,6 +46,29 @@ export const requestRoomPlayerSeat = async (
         token,
       }
     );
+    return Promise.resolve(data.data);
+  } catch (error) {
+    if (axios.isAxiosError<ResponseError>(error)) {
+      const message = error.response?.data.message;
+
+      if (message) {
+        return Promise.reject(message);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+};
+
+export const requestRoomSpectatorSeat = async (
+  code: string
+): Promise<RoomSpectateResponse> => {
+  try {
+    const { data } = await axios.post<
+      DefaultResponse<RoomSpectateResponse, Error>
+    >("http://localhost:4000/game/watch", {
+      roomCode: code,
+    });
     return Promise.resolve(data.data);
   } catch (error) {
     if (axios.isAxiosError<ResponseError>(error)) {

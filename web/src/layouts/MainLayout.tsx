@@ -33,6 +33,11 @@ const NicknameContainer = styled.div`
   padding-right: 12px;
 `
 
+const TrailingItems = styled.div`
+  display: flex;
+  gap: 12px;
+`
+
 const NicknameEditor: FC = () => {
   const [cookie, setNicknameCookie] = useCookies(["nickname"])
   const [editNicknameOpen, setEditNicknameOpen] = useState(false);
@@ -93,8 +98,10 @@ export const MainLayout: FC<MainLayoutProps> = ({ children }) => {
     <LayoutContainer theme={theme}>
       <Header>
         <h1> Knucklebones </h1>
-        <Switch checked={theme.name === "dark"} onChange={toggleTheme} />
-        <NicknameEditor />
+        <TrailingItems>
+          <Switch checked={theme.name === "dark"} onChange={toggleTheme} />
+          <NicknameEditor />
+        </TrailingItems>
       </Header>
       {children}
     </LayoutContainer>

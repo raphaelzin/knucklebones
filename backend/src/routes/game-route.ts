@@ -9,6 +9,7 @@ import { GameRoom } from "../models/GameRoom/GameRoom";
 import {
   PlayerTicket,
   RoomJoinResponse,
+  RoomSpectateResponse,
 } from "@knucklebones/shared-models/src/RemoteResponses";
 import { InvalidPayload } from "../models/GameRoom/GameRoomErrors";
 
@@ -50,16 +51,43 @@ router.post("/create-game", async (req: Request, res: Response) => {
   });
 });
 
+router.post("/watch", async (req: Request, res: Response) => {
+  const { roomCode } = req.body;
+
+  if (!req.params || !roomCode) {
+    res.statusCode = 400;
+    res.send(
+      InvalidPayload(
+        "Missing roomCode",
+        `params: ${JSON.stringify(req.params)}`
+      )
+    );
+    return;
+  }
+
+  const response: RoomSpectateResponse = {
+    code: roomCode,
+  };
+
+  res.statusCode = 200;
+  res.send({ data: response });
+});
+
 router.post("/join", async (req: Request, res: Response) => {
   const { nickname, roomCode, token } = req.body;
   if (!req.params || !nickname) {
     res.statusCode = 400;
-    res.send({ code: "Nope" });
+    res.send(
+      InvalidPayload(
+        "Missing nickname",
+        `params: ${JSON.stringify(req.params)}`
+      )
+    );
     return;
   }
 
   let room: GameRoom;
-  let playerTicket: { id: string; token: string };
+  let playerTicket: PlayerTicket;
   try {
     room = await getRoom(roomCode);
     playerTicket = room.ticket(token);

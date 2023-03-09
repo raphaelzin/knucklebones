@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import styled from "styled-components"
 import { HomeCard } from "../../components/HomeCard"
 import { RuleDescription } from "../../components/Rules/RuleDescription"
-import { requestRoomCreation, requestRoomPlayerSeat } from "./HomeController"
+import { requestRoomCreation, requestRoomPlayerSeat, requestRoomSpectatorSeat } from "./HomeController"
 import { useCookies } from "react-cookie";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, TextField } from "@mui/material"
 import { Theme } from "../../style/theme"
@@ -72,6 +72,16 @@ export const HomePage: FC = () => {
       setTokenCookie("token", response.ticket.token)
 
       navigate(`/games/${response.code}`)
+    }, (error) => {
+      const message = error instanceof Error ? error.message : JSON.stringify(error)
+      setErrorMessage(message)
+      setIsDisplayingError(true)
+    })
+  }
+
+  const handleRoomSpectate = (code: string) => {
+    requestRoomSpectatorSeat(code).then((response) => {
+      navigate(`/games/${response.code}`, { state: { isSpectating: true } })
     }, (error) => {
       const message = error instanceof Error ? error.message : JSON.stringify(error)
       setErrorMessage(message)
@@ -161,7 +171,7 @@ export const HomePage: FC = () => {
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setSpectateDialogOpen(false)}>Cancel</Button>
-                <Button onClick={() => console.log("To do")} >Join</Button>
+                <Button onClick={() => handleRoomSpectate(roomCode)} >Join</Button>
               </DialogActions>
             </Dialog>
           </StyledHomeCard>

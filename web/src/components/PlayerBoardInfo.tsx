@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Die from "./Die/Die";
 
 export interface PlayerBoardInfoProps {
+  isTopBoard: boolean
   nickname?: string
   score?: number
   die?: number
@@ -14,12 +15,13 @@ const InfoContainer = styled.div`
   gap: 8px;
 `
 
-export const PlayerBoardInfo: FC<PlayerBoardInfoProps> = (props) => {
+export const PlayerBoardInfo: FC<PlayerBoardInfoProps> = ({ nickname, score, die, isTopBoard }) => {
   return (
     <InfoContainer>
-      <div>{props.nickname ?? "<Not Available>"}</div>
-      <div>{props.score ?? 0}</div>
-      <DiceBox die={props.die} />
+      {isTopBoard && <DiceBox die={die} />}
+      <div>{nickname ?? "<Not Available>"}</div>
+      <div>{score ?? 0}</div>
+      {!isTopBoard && <DiceBox die={die} />}
     </InfoContainer>
   )
 }

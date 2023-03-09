@@ -1,5 +1,5 @@
 import { createBoardState, Game } from "./game/Game";
-import { Rules } from "./rules/Rules";
+import { Rules } from "@knucklebones/shared-models/src/Rules";
 import DiceTower, { DiceTowerInterface } from "./game/DiceTower";
 import {
   GameStateSummary,

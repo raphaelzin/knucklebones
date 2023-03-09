@@ -35,7 +35,7 @@ export class GameController implements GameControllerInterface {
   token?: string;
   id?: string;
 
-  constructor(roomCode: string, nickname: string) {
+  constructor(roomCode: string, nickname: string, isSpectating: boolean) {
     this.cookies = new Cookies();
     this.roomCode = roomCode;
     const token = this.cookies.get(`token`);
@@ -47,7 +47,8 @@ export class GameController implements GameControllerInterface {
     }
 
     // TODO: use dot env
-    this.socket = io(`localhost:4444/game/play`, {
+    const path = isSpectating ? `watch` : `play`;
+    this.socket = io(`localhost:4444/game/${path}`, {
       transports: ["websocket"],
       query,
     });
@@ -93,8 +94,8 @@ export class GameController implements GameControllerInterface {
     if (!this.id) throw { message: "wtf, I don't have an id" };
 
     let playerBoards: LocalPlayerBoardState[] = [];
-    let playerInfo: PlayerBoardInfoProps = {};
-    let opponentInfo: PlayerBoardInfoProps = {};
+    let playerInfo: PlayerBoardInfoProps = { isTopBoard: false };
+    let opponentInfo: PlayerBoardInfoProps = { isTopBoard: true };
 
     for (const key of Object.keys(state.boardState.players)) {
       const board = state.boardState.players[key];

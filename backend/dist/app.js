@@ -248,6 +248,10 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
             rules: this.controller.game.rules
         });
         this.spectators.push(client);
+        this.emit(socket, {
+            kind: "game-state-update",
+            state: this.controller.gameStateSummary
+        });
     }
     setupListeners(socket) {
         socket.on("game-event", (payload)=>{
@@ -398,13 +402,26 @@ $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/create-game", async (req, res)=
         data: response
     });
 });
+$3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/watch", async (req, res)=>{
+    const { roomCode: roomCode  } = req.body;
+    if (!req.params || !roomCode) {
+        res.statusCode = 400;
+        res.send((0, $8925cb211138c4b2$export$18a9427d80c1a057)("Missing roomCode", `params: ${JSON.stringify(req.params)}`));
+        return;
+    }
+    const response = {
+        code: roomCode
+    };
+    res.statusCode = 200;
+    res.send({
+        data: response
+    });
+});
 $3f204e84b16f54c0$export$5375cda95f0b0eb4.post("/join", async (req, res)=>{
     const { nickname: nickname , roomCode: roomCode , token: token  } = req.body;
     if (!req.params || !nickname) {
         res.statusCode = 400;
-        res.send({
-            code: "Nope"
-        });
+        res.send((0, $8925cb211138c4b2$export$18a9427d80c1a057)("Missing nickname", `params: ${JSON.stringify(req.params)}`));
         return;
     }
     let room;
