@@ -160,14 +160,13 @@ const StyledNickname = styled.div`
 
 export const ScoreBoard: FC<{ firstPlayer: PlayerInfo, secondPlayer: PlayerInfo }> = ({ firstPlayer, secondPlayer }) => {
   return (
-    <div>
-      <StyledScoreBoard>
-        <StyledScore>{firstPlayer.score}</StyledScore>
-        <StyledNickname>{firstPlayer.nickname}</StyledNickname>
-        <span>|</span>
-        <StyledNickname>{secondPlayer.nickname}</StyledNickname>
-        <StyledScore>{secondPlayer.score}</StyledScore>
-      </StyledScoreBoard>
-    </div>
+    <StyledScoreBoard>
+      <StyledScore>{firstPlayer.score}</StyledScore>
+      <StyledNickname>{firstPlayer.nickname}</StyledNickname>
+      <span>|</span>
+      <StyledNickname>{secondPlayer.nickname}</StyledNickname>
+      <StyledScore>{secondPlayer.score}</StyledScore>
+    </StyledScoreBoard>
+
   )
 }

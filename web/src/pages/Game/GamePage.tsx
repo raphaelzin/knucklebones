@@ -74,8 +74,12 @@ export const GamePage = () => {
     }
   })
 
-  const playerInfo = playerInfos.find(p => p.id === selfId)
-  const opponentInfo = playerInfos.find(p => p.id !== selfId)
+  const playerInfo = playerInfos.find((p, i) => {
+    return isSpectating ? i === 0 : p.id === selfId;
+  })
+  const opponentInfo = playerInfos.find((p, i) => {
+    return isSpectating ? i !== 0 : p.id !== selfId;
+  })
 
   const onPlay = (column: number) => {
     if (controller.current) controller.current.play(column)
@@ -113,10 +117,10 @@ export const GamePage = () => {
             {isGameFinished && (
               <>
                 {isSpectating && (
-                  <>
-                    <p>{"Game Over!"} </p>
+                  <div>
+                    <h1>{"Game Over!"}</h1>
                     <ScoreBoard firstPlayer={playerInfo!} secondPlayer={opponentInfo!} />
-                  </>
+                  </div>
                 )}
                 {!isSpectating && (
                   <EndGameBanner
