@@ -1,13 +1,12 @@
-import { GameState } from "@knucklebones/shared-models/src/RemoteState";
-import { Button } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { Board, PlayerBoardState, Turn } from "../../components/Board/Board";
-import { PlayerBoardInfo, PlayerBoardInfoProps } from "../../components/PlayerBoardInfo";
-import { GameController, GameControllerInterface, LocalGameState } from "./GameController";
+import { EndGameBanner, PlayerBoard, ScoreBoard } from "../../components/Board/Board";
+import { PlayerBoardInfo } from "../../components/PlayerBoardInfo";
+import { GameController, GameControllerInterface } from "./GameController";
+import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 
-const BoardContainer = styled.div`
+const GameContainer = styled.div`
   display: flex;
   justify-content: center;
   gap: 100px;
@@ -29,48 +28,122 @@ const PageContainer = styled.div`
   padding: 12px;
 `
 
+const BoardContainer = styled.div`
+  display: flex;
+  gap: 40px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`
+
+export interface PlayerInfo {
+  nickname: string;
+  score: number;
+  id: string;
+  board: number[][];
+}
+
 export const GamePage = () => {
   const { roomCode } = useParams()
   let controller = useRef<GameControllerInterface>()
-  const [gameState, setGameState] = useState<GameState | undefined>()
-
-  const locationState = useLocation().state
-  const isSpectating = locationState?.isSpectating ?? false
+  const [gameStateSummary, setGameStateSummary] = useState<GameStateSummary | undefined>()
+  const isSpectating = useLocation().state?.isSpectating ?? false
 
   useEffect(() => {
     controller.current = new GameController(roomCode ?? "0", "raph", isSpectating)
     controller.current.onStateUpdate = (state) => {
-      setTurn(state.turn)
-      setBoards(state.boards)
-
-      setOpponentInfo(state.opponentInfo)
-      setPlayerInfo(state.playerInfo)
+      setGameStateSummary(state);
     }
   }, [roomCode, isSpectating]);
 
-  const [opponentInfo, setOpponentInfo] = useState<PlayerBoardInfoProps>()
-  const [playerInfo, setPlayerInfo] = useState<PlayerBoardInfoProps>()
+  if (!gameStateSummary) return (<div>Loading...</div>)
+  console.log(gameStateSummary)
+  const boards = gameStateSummary.boardState.players
+  const state = gameStateSummary.state
 
-  const [turn, setTurn] = useState<Turn>()
-  const [boards, setBoards] = useState<PlayerBoardState[]>([])
+
+
+  const selfId = controller.current?.id ?? "";
+  const playerInfos: PlayerInfo[] = Object.keys(boards).map((id, i) => {
+    const board = boards[id]
+    return {
+      nickname: board.nickname,
+      score: board.score,
+      board: board.board,
+      id: id
+    }
+  })
+
+  const playerInfo = playerInfos.find(p => p.id === selfId)
+  const opponentInfo = playerInfos.find(p => p.id !== selfId)
+
+  const onPlay = (column: number) => {
+    if (controller.current) controller.current.play(column)
+  };
+
+  const boardSize = controller.current?.rules?.boardSize ?? 3;
+  const isMyTurn = state?.kind === "turn" && state.playerId === selfId;
+  const isGameFinished = state.kind === "win" || state.kind === "tie";
 
   return (
     <PageContainer>
       Room Code: <strong>{controller.current?.roomCode}</strong>
-      <BoardContainer>
-        <PlayerInfoContainer isOwnBoard={!isSpectating}>
 
-          <PlayerBoardInfo {...playerInfo} isTopBoard={false} />
-          <Button size="large">🎉</Button>
-        </PlayerInfoContainer>
-        <Board boardSize={controller.current?.rules?.boardSize ?? 3} boards={boards} turn={turn ?? "opponent"} onPlay={(index) => {
-          if (controller.current) controller.current.play(index);
-        }} />
-        <PlayerInfoContainer isOwnBoard={false}>
-          <Button size="large">🎉</Button>
-          <PlayerBoardInfo  {...opponentInfo} isTopBoard={true} />
-        </PlayerInfoContainer>
-      </BoardContainer >
+      {state.kind === "waiting-player" && (
+        <>
+          <h2>Waiting for another player...</h2>
+          {state.playersPresent.length > 0 && <h3 style={{ margin: 0 }}>Players Present:</h3>}
+          {state.playersPresent.map((p, i) => <p key={i} style={{ margin: 0 }}>{p.nickname}</p>)}
+        </>
+      )}
+
+      {state.kind !== "waiting-player" && (
+        <GameContainer>
+          {!isGameFinished && (
+            <PlayerInfoContainer isOwnBoard={!isSpectating}>
+              <PlayerBoardInfo {...playerInfo} isTopBoard={false} die={state.kind === "turn" && state.playerId === playerInfo?.id ? state.die : undefined} />
+            </PlayerInfoContainer>
+          )}
+          <BoardContainer>
+            {opponentInfo && (
+              <PlayerBoard
+                grid={opponentInfo.board}
+                size={boardSize} />
+            )}
+            {isGameFinished && (
+              <>
+                {isSpectating && (
+                  <>
+                    <p>{"Game Over!"} </p>
+                    <ScoreBoard firstPlayer={playerInfo!} secondPlayer={opponentInfo!} />
+                  </>
+                )}
+                {!isSpectating && (
+                  <EndGameBanner
+                    playerInfo={playerInfo!}
+                    opponentInfo={opponentInfo!}
+                    state={state}
+                    userId={selfId}
+                  />
+                )}
+              </>
+            )}
+            {playerInfo && (
+              <PlayerBoard
+                onPlay={onPlay}
+                grid={playerInfo.board}
+                size={boardSize}
+                isActiveTurn={isMyTurn}
+                isOwnBoard={!isSpectating} />
+            )}
+          </BoardContainer>
+          {!isGameFinished && (
+            <PlayerInfoContainer isOwnBoard={false}>
+              <PlayerBoardInfo  {...opponentInfo} isTopBoard={true} die={state.kind === "turn" && state.playerId === opponentInfo?.id ? state.die : undefined} />
+            </PlayerInfoContainer>
+          )}
+        </GameContainer >
+      )}
     </ PageContainer>
   )
 }

@@ -2,30 +2,20 @@ import { io, Socket } from "socket.io-client";
 import { Cookies } from "react-cookie";
 import { Rules } from "@knucklebones/shared-models/src/Rules";
 
-import {
-  PlayerBoardState as LocalPlayerBoardState,
-  Turn as LocalTurn,
-} from "../../components/Board/Board";
-import { PlayerBoardInfoProps } from "../../components/PlayerBoardInfo";
+import { PlayerBoardState as LocalPlayerBoardState } from "../../components/Board/Board";
 import { GameStateSummary as RemoteGameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 
 export interface GameControllerInterface {
   roomCode: string;
+  id?: string;
   rules?: Rules;
-  onStateUpdate?: (state: LocalGameState) => void;
+  onStateUpdate?: (state: RemoteGameStateSummary) => void;
   onEvent?: (event: any) => void;
   play(column: number): void;
 }
 
-export interface LocalGameState {
-  boards: LocalPlayerBoardState[];
-  turn: LocalTurn;
-  opponentInfo: PlayerBoardInfoProps;
-  playerInfo: PlayerBoardInfoProps;
-}
-
 export class GameController implements GameControllerInterface {
-  onStateUpdate?: (state: LocalGameState) => void = undefined;
+  onStateUpdate?: (state: RemoteGameStateSummary) => void = undefined;
   onEvent?: (event: any) => void = undefined;
   socket: Socket;
   cookies: Cookies;
@@ -83,60 +73,25 @@ export class GameController implements GameControllerInterface {
     });
 
     this.socket.on("game-state-update", (args) => {
-      console.log(`Game State: ${JSON.stringify(args)}`);
-      const newLocalState = this.convertRemoteToLocalState(args.state);
-      if (this.onStateUpdate) this.onStateUpdate(newLocalState);
+      this.onStateUpdate?.(args.state as RemoteGameStateSummary);
     });
   }
-
-  convertRemoteToLocalState(state: RemoteGameStateSummary): LocalGameState {
-    // eslint-disable-next-line no-throw-literal
-    if (!this.id) throw { message: "wtf, I don't have an id" };
-
-    let playerBoards: LocalPlayerBoardState[] = [];
-    let playerInfo: PlayerBoardInfoProps = { isTopBoard: false };
-    let opponentInfo: PlayerBoardInfoProps = { isTopBoard: true };
-
-    for (const key of Object.keys(state.boardState.players)) {
-      const board = state.boardState.players[key];
-      const localBoard: LocalPlayerBoardState = {
-        grid: board.board,
-        score: board.score,
-        owner: key === this.id ? "self" : "opponent",
-      };
-
-      // Is self
-      if (key === this.id) {
-        playerBoards.push(localBoard);
-        playerInfo.score = localBoard.score;
-        playerInfo.nickname = board.nickname;
-      } else {
-        playerBoards.splice(0, 0, localBoard);
-        opponentInfo.score = localBoard.score;
-        opponentInfo.nickname = board.nickname;
-      }
-    }
-
-    if (state.state.kind === "turn") {
-      if (state.state.playerId === this.id) {
-        playerInfo.die = state.state.die;
-      } else {
-        opponentInfo.die = state.state.die;
-      }
-
-      return {
-        boards: playerBoards,
-        turn: state.state.playerId === this.id ? "self" : "opponent",
-        playerInfo,
-        opponentInfo,
-      };
-    }
-
-    return {
-      boards: playerBoards,
-      turn: "opponent",
-      playerInfo,
-      opponentInfo,
-    };
-  }
 }
+
+export const GetBoardsFromRemoteState = (
+  state: RemoteGameStateSummary
+): LocalPlayerBoardState[] => {
+  let boards: LocalPlayerBoardState[] = [];
+
+  for (const key of Object.keys(state.boardState.players)) {
+    const board = state.boardState.players[key];
+    const localBoard: LocalPlayerBoardState = {
+      grid: board.board,
+      score: board.score,
+      playerId: key,
+    };
+
+    boards.push(localBoard);
+  }
+  return boards;
+};

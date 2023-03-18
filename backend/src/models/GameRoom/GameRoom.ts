@@ -83,7 +83,6 @@ export class GameRoom {
 
   handlePlay(socket: IOSocket, payload: any) {
     const { column, token } = payload;
-
     const player = this.players.filter((p) => p.token == token)[0];
 
     if (column === undefined || !player) {
@@ -102,7 +101,6 @@ export class GameRoom {
   }
 
   handleReconnectRequest(socket: IOSocket, token: string) {
-    console.log("Reconnecting user");
     const player = this.players.filter((p) => p.token == token)[0];
     if (!player) {
       this.emit(socket, {

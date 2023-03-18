@@ -17,6 +17,10 @@ export interface TieFinish {
 
 export interface WaitingPlayer {
   kind: "waiting-player";
+  playersPresent: {
+    id: string;
+    nickname: string;
+  }[];
 }
 
 export type FinishedState = WinningFinish | TieFinish;

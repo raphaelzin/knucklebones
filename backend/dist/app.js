@@ -82,7 +82,8 @@ class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
             players: []
         };
         this.gameStateSummary = this.createState({
-            kind: "waiting-player"
+            kind: "waiting-player",
+            playersPresent: []
         });
     }
     gameIsFull() {
@@ -96,6 +97,13 @@ class $cbed54bc08405ed8$export$f3f3f6c0124f08de {
             nickname: nickname,
             board: board
         });
+        if (this.gameStateSummary.state.kind === "waiting-player") {
+            this.gameStateSummary.state.playersPresent.push({
+                nickname: nickname,
+                id: identifier
+            });
+            this.gameStateCallback(this.gameStateSummary);
+        }
         // Reached the number of players, start game.
         if (this.game.players.length == this.game.rules.numberOfPlayers) {
             this.gameStateSummary = this.createState(this.createNextTurn(this.game.players[0].identifier));
@@ -278,7 +286,6 @@ class $c9b2dff07f2e6e1c$export$ddffd877baf3c775 {
         }
     }
     handleReconnectRequest(socket, token) {
-        console.log("Reconnecting user");
         const player = this.players.filter((p)=>p.token == token)[0];
         if (!player) {
             this.emit(socket, {

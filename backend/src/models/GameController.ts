@@ -34,6 +34,7 @@ export class GameController implements GameControllerInterface {
     this.game = { rules: rules, players: [] };
     this.gameStateSummary = this.createState({
       kind: "waiting-player",
+      playersPresent: [],
     });
   }
 
@@ -50,6 +51,14 @@ export class GameController implements GameControllerInterface {
       nickname: nickname,
       board: board,
     });
+
+    if (this.gameStateSummary.state.kind === "waiting-player") {
+      this.gameStateSummary.state.playersPresent.push({
+        nickname,
+        id: identifier,
+      });
+      this.gameStateCallback(this.gameStateSummary);
+    }
 
     // Reached the number of players, start game.
     if (this.game.players.length == this.game.rules.numberOfPlayers) {
