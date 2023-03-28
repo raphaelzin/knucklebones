@@ -1,5 +1,5 @@
 {
-  "name": "knucklebones-web",
+  "name": "@knucklebones/web",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

@@ -1,8 +1,8 @@
-import { Rules } from "@knucklebones/shared-models/src/Rules";
 import {
+  Rules,
   BoardState,
   PlayerBoardState,
-} from "@knucklebones/shared-models/src/RemoteState";
+} from "@knucklebones/shared-models";
 
 export interface Player {
   identifier: string;

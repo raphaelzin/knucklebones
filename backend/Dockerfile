@@ -1,19 +1,20 @@
-FROM node:19-alpine
+FROM node:19-alpine as base
 
-# Create app directory
-WORKDIR /app
+WORKDIR /project
 
-RUN npm install -g yarn
+FROM base AS dependencies
 
-COPY ["package.json", "package-lock.json*", "./"]
-COPY ["../yarn.lock", "./""]
-COPY ["../libs", "./""]
+# We only copy the dependencies we need
+COPY libs/shared-models libs/shared-models
 
-ENV NODE_ENV production
-# RUN npm install -g yarn
-# RUN yarn install --production
-RUN npm install --production
+COPY backend backend
 
-COPY . .
-RUN yarn build
-CMD [ "node", "dist/app.js" ]
+# The global package.json only contains build dependencies
+COPY package.json .
+COPY yarn.lock .
+
+
+RUN yarn workspace @knucklebones/backend install --production
+RUN yarn workspace @knucklebones/backend build
+
+CMD [ "node", "backend/dist/app.cjs" ]
