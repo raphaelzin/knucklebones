@@ -1,8 +1,6 @@
 FROM node:19-alpine as base
 
-WORKDIR /project
-
-FROM base AS dependencies
+WORKDIR /app
 
 # We only copy the dependencies we need
 COPY libs/shared-models libs/shared-models
@@ -17,4 +15,9 @@ COPY yarn.lock .
 RUN yarn workspace @knucklebones/backend install --production
 RUN yarn workspace @knucklebones/backend build
 
-CMD [ "node", "backend/dist/app.cjs" ]
+FROM node:19-alpine as production
+
+WORKDIR /app
+COPY --from=base /app/backend/dist .
+
+CMD [ "node", "app.cjs" ]

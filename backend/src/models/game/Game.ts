@@ -1,19 +1,9 @@
 import {
-  Rules,
+  Game,
+  Player,
   BoardState,
   PlayerBoardState,
 } from "@knucklebones/shared-models";
-
-export interface Player {
-  identifier: string;
-  nickname: string;
-  board: number[][];
-}
-
-export interface Game {
-  players: Player[];
-  rules: Rules;
-}
 
 export function createBoardState(game: Game): BoardState {
   const state: { [key: string]: PlayerBoardState } = {};
