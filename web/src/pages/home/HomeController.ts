@@ -7,6 +7,9 @@ import {
   RoomSpectateResponse,
 } from "@knucklebones/shared-models/src/RemoteResponses";
 import axios from "axios";
+import { env } from "../../environment";
+
+const baseUrl = env.apiUrl;
 
 export const requestRoomCreation = async (
   nickname: string
@@ -14,7 +17,7 @@ export const requestRoomCreation = async (
   try {
     const { data } = await axios.post<
       DefaultResponse<RoomCreationResponse, Error>
-    >("http://localhost:4000/game/create-game", {
+    >(`${baseUrl}/game/create-game`, {
       nickname,
     });
 
@@ -39,7 +42,7 @@ export const requestRoomPlayerSeat = async (
 ): Promise<RoomJoinResponse> => {
   try {
     const { data } = await axios.post<DefaultResponse<RoomJoinResponse, Error>>(
-      "http://localhost:4000/game/join",
+      `${baseUrl}/game/join`,
       {
         nickname,
         roomCode: code,
@@ -66,7 +69,7 @@ export const requestRoomSpectatorSeat = async (
   try {
     const { data } = await axios.post<
       DefaultResponse<RoomSpectateResponse, Error>
-    >("http://localhost:4000/game/watch", {
+    >(`${baseUrl}/game/watch`, {
       roomCode: code,
     });
     return Promise.resolve(data.data);

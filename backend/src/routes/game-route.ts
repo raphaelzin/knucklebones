@@ -12,22 +12,36 @@ import {
   RoomSpectateResponse,
 } from "@knucklebones/shared-models/src/RemoteResponses";
 import { InvalidPayload } from "../models/GameRoom/GameRoomErrors";
+import Joi from "joi";
+import { pino } from "pino";
+import { env } from "../environment";
 
+const logger = pino();
 export const router = express.Router();
 
 router.post("/create-game", async (req: Request, res: Response) => {
-  const { nickname } = req.body;
+  const schema = Joi.object({
+    nickname: Joi.string().required(),
+  });
 
-  if (!req.params || !nickname) {
+  const { error } = schema.validate(req.body);
+  if (error) {
     res.statusCode = 400;
     res.send(
       InvalidPayload(
-        "Missing nickname",
+        `Invalid payload: ${error.message}`,
         `params: ${JSON.stringify(req.params)}`
       )
     );
+    logger.error(
+      `Create game request failed. Payload: ${JSON.stringify(
+        req.body
+      )}. Error: ${error.message}`
+    );
     return;
   }
+
+  const { nickname } = req.body;
 
   let newRoom: GameRoom;
   let playerTicket: PlayerTicket;
@@ -52,8 +66,28 @@ router.post("/create-game", async (req: Request, res: Response) => {
 });
 
 router.post("/watch", async (req: Request, res: Response) => {
-  const { roomCode } = req.body;
+  const schema = Joi.object({
+    roomCode: Joi.string().required(),
+  });
 
+  const { error } = schema.validate(req.body);
+  if (error) {
+    res.statusCode = 400;
+    res.send(
+      InvalidPayload(
+        `Invalid payload: ${error.message}`,
+        `params: ${JSON.stringify(req.params)}`
+      )
+    );
+    logger.error(
+      `Watch game request failed. Payload: ${JSON.stringify(
+        req.body
+      )}. Error: ${error.message}`
+    );
+    return;
+  }
+
+  const { roomCode } = req.body;
   if (!req.params || !roomCode) {
     res.statusCode = 400;
     res.send(
@@ -74,17 +108,30 @@ router.post("/watch", async (req: Request, res: Response) => {
 });
 
 router.post("/join", async (req: Request, res: Response) => {
-  const { nickname, roomCode, token } = req.body;
-  if (!req.params || !nickname) {
+  const schema = Joi.object({
+    nickname: Joi.string().required(),
+    roomCode: Joi.string().required(),
+    token: Joi.string().optional(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
     res.statusCode = 400;
     res.send(
       InvalidPayload(
-        "Missing nickname",
+        `Invalid payload: ${error.message}`,
         `params: ${JSON.stringify(req.params)}`
       )
     );
+    logger.error(
+      `Join game request failed. Payload: ${JSON.stringify(req.body)}. Error: ${
+        error.message
+      }`
+    );
     return;
   }
+
+  const { nickname, roomCode, token } = req.body;
 
   let room: GameRoom;
   let playerTicket: PlayerTicket;
@@ -113,9 +160,9 @@ router.post("/join", async (req: Request, res: Response) => {
 });
 
 // TODO: use dotenv
-const io = new WebSocketServer(4444, {
+const io = new WebSocketServer(env.websocketPort, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: `http://${env.host}:${env.port}`,
   },
 });
 
