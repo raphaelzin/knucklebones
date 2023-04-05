@@ -13,6 +13,8 @@ app.use(
     origin: [
       `http://${env.host}:${env.frontendPort}`,
       `https://${env.host}:${env.frontendPort}`,
+      `http://${env.host}`,
+      `https://${env.host}`,
     ],
   })
 );
