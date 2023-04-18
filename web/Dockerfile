@@ -14,4 +14,6 @@ COPY yarn.lock .
 RUN yarn workspace @knucklebones/web install --production
 RUN yarn workspace @knucklebones/web build
 
-CMD ["yarn", "workspace", "@knucklebones/web", "start"]
+RUN npm install -g serve
+
+CMD ["serve", "-s", "serve"]

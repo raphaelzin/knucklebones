@@ -4,6 +4,7 @@ services:
     image: kb-backend
     ports:
       - "8000:8000"
+      - "4001:4001"
     # Add any environment variables, volumes, or other settings as needed
     environment:
       - PORT=8000
