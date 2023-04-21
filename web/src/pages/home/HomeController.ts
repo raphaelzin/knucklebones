@@ -9,7 +9,7 @@ import {
 import axios from "axios";
 import { env } from "../../environment";
 
-const baseUrl = env.apiUrl;
+const baseUrl = `http://${env.host}:${env.apiPort}`;
 
 export const requestRoomCreation = async (
   nickname: string

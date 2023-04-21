@@ -38,7 +38,7 @@ export class GameController implements GameControllerInterface {
     }
 
     const path = isSpectating ? `watch` : `play`;
-    this.socket = io(`${env.websocketUrl}/game/${path}`, {
+    this.socket = io(`${env.host}:${env.websocketPort}/game/${path}`, {
       transports: ["websocket"],
       query,
     });

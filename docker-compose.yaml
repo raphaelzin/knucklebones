@@ -3,25 +3,23 @@ services:
   backend:
     image: kb-backend
     ports:
-      - "8000:8000"
-      - "4001:4001"
-    # Add any environment variables, volumes, or other settings as needed
+      - "${API_PORT}:${API_PORT}"
+      - "${API_WEBSOCKET_PORT}:${API_WEBSOCKET_PORT}"
     environment:
-      - PORT=8000
-      - HOST=localhost
-      - WEBSOCKET_PORT=4001
-      - FRONTEND_PORT=3000
+      - API_PORT=${API_PORT}
+      - HOST=${HOST}
+      - API_WEBSOCKET_PORT=${API_WEBSOCKET_PORT}
+      - FRONTEND_PORT=${FRONTEND_PORT}
   frontend:
     image: kb-frontend
     ports:
-      - "3000:3000"
-    # Add any environment variables, volumes, or other settings as needed
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     environment:
-      - PORT=3000
-      - REACT_APP_API_URL=http://localhost:8000
-      - REACT_APP_WEBSOCKET_URL=localhost:4001
+      - FRONTEND_PORT=${FRONTEND_PORT}
+      - REACT_APP_API_URL=http://${HOST}:${API_PORT}
+      - REACT_APP_WEBSOCKET_URL=${HOST}:${API_WEBSOCKET_PORT}
   nginx:
-    image: nginx
+    image: raphaelpsouza/kb-nginx:latest
     ports:
       - "80:80"
     volumes:

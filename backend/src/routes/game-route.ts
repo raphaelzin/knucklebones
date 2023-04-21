@@ -159,7 +159,6 @@ router.post("/join", async (req: Request, res: Response) => {
   });
 });
 
-// TODO: use dotenv
 const io = new WebSocketServer(env.websocketPort, {
   cors: {
     origin: `http://${env.host}:${env.port}`,
