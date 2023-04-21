@@ -4,6 +4,7 @@ import { Rules } from "@knucklebones/shared-models/src/Rules";
 
 import { PlayerBoardState as LocalPlayerBoardState } from "../../components/Board/Board";
 import { GameStateSummary as RemoteGameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
+import { env } from "../../environment";
 
 export interface GameControllerInterface {
   roomCode: string;
@@ -36,9 +37,8 @@ export class GameController implements GameControllerInterface {
       query["token"] = token;
     }
 
-    // TODO: use dot env
     const path = isSpectating ? `watch` : `play`;
-    this.socket = io(`localhost:4444/game/${path}`, {
+    this.socket = io(`${env.host}:${env.websocketPort}/game/${path}`, {
       transports: ["websocket"],
       query,
     });

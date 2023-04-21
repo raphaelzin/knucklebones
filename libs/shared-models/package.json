@@ -2,9 +2,11 @@
   "name": "@knucklebones/shared-models",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
-    "eslint": "^8.29.0"
-  }
+  "type": "module",
+  "source": "./src/index.ts",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "files": [
+    "./src"
+  ]
 }

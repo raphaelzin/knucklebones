@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  backend:
+    image: kb-backend
+    ports:
+      - "${API_PORT}:${API_PORT}"
+      - "${API_WEBSOCKET_PORT}:${API_WEBSOCKET_PORT}"
+    environment:
+      - API_PORT=${API_PORT}
+      - HOST=${HOST}
+      - API_WEBSOCKET_PORT=${API_WEBSOCKET_PORT}
+      - FRONTEND_PORT=${FRONTEND_PORT}
+  frontend:
+    image: kb-frontend
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    environment:
+      - FRONTEND_PORT=${FRONTEND_PORT}
+      - REACT_APP_API_URL=http://${HOST}:${API_PORT}
+      - REACT_APP_WEBSOCKET_URL=${HOST}:${API_WEBSOCKET_PORT}
+  nginx:
+    image: raphaelpsouza/kb-nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
