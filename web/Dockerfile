@@ -2,8 +2,6 @@ FROM node:19-alpine as base
 
 WORKDIR /app
 
-RUN npm install --global serve
-
 # We only copy the dependencies we need
 COPY libs/shared-models libs/shared-models
 
@@ -16,4 +14,14 @@ COPY yarn.lock .
 RUN yarn workspace @knucklebones/web install --production
 RUN yarn workspace @knucklebones/web build
 
-CMD ["serve", "-s", "web/build", "-d"]
+# Production stage
+FROM node:19-alpine
+
+WORKDIR /app
+RUN npm install --global serve
+# Copy the built dist folder from the previous stage
+COPY --from=base /app/web/dist /app/dist
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-d"]

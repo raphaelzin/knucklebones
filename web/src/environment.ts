@@ -11,8 +11,8 @@ const Environment = z.object({
 type Environment = z.infer<typeof Environment>;
 
 export const env = Environment.parse({
-  port: +process.env.REACT_APP_FRONTEND_PORT!,
-  host: process.env.REACT_APP_HOST!,
-  apiPort: +process.env.REACT_APP_API_PORT!,
-  websocketPort: +process.env.REACT_APP_WEBSOCKET_PORT!,
+  port: +import.meta.env.VITE_FRONTEND_PORT,
+  host: import.meta.env.VITE_HOST,
+  apiPort: +import.meta.env.VITE_API_PORT,
+  websocketPort: +import.meta.env.VITE_WEBSOCKET_PORT,
 });

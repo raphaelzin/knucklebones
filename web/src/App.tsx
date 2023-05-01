@@ -9,6 +9,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { GamePage } from './pages/Game/GamePage';
 import { HomePage } from './pages/home/Home';
 import getTheme, { Theme } from './style/theme'
+import { env } from './environment';
 
 const darkTheme = createTheme({
   palette: {
@@ -42,6 +43,10 @@ function App() {
   };
 
   const theme: Theme = getTheme(isDarkMode);
+  // console.log("env", process.env);
+  console.log(import.meta.env)
+  console.log(import.meta.env.VITE_HOST)
+  console.log(env)
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }} >

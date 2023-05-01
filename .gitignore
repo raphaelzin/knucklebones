@@ -2,9 +2,8 @@
 **/node_modules/*
 **/.yarn/*
 
-.parcel-cache
-**/build/*
-**/dist/*
+**/build
+**/dist
 
 .DS_Store
 **/.env
