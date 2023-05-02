@@ -10,9 +10,15 @@ const Environment = z.object({
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 type Environment = z.infer<typeof Environment>;
 
-export const env = Environment.parse({
+const env = Environment.parse({
   port: +import.meta.env.VITE_FRONTEND_PORT,
   host: import.meta.env.VITE_HOST,
   apiPort: +import.meta.env.VITE_API_PORT,
   websocketPort: +import.meta.env.VITE_WEBSOCKET_PORT,
 });
+
+export const config = {
+  env,
+  baseUrl: `http://${env.host}:${env.apiPort}/api`,
+  websocketUrl: `ws://${env.host}:${env.websocketPort}`,
+};

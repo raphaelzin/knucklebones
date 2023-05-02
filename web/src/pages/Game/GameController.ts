@@ -1,10 +1,9 @@
 import { io, Socket } from "socket.io-client";
 import { Cookies } from "react-cookie";
 import { Rules } from "@knucklebones/shared-models/src/Rules";
-
 import { PlayerBoardState as LocalPlayerBoardState } from "../../components/Board/Board";
 import { GameStateSummary as RemoteGameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
-import { env } from "../../environment";
+import { config } from "../../environment";
 
 export interface GameControllerInterface {
   roomCode: string;
@@ -38,7 +37,7 @@ export class GameController implements GameControllerInterface {
     }
 
     const path = isSpectating ? `watch` : `play`;
-    this.socket = io(`${env.host}:${env.websocketPort}/game/${path}`, {
+    this.socket = io(`${config.websocketUrl}/game/${path}`, {
       transports: ["websocket"],
       query,
     });
