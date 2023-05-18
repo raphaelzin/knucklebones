@@ -1,18 +1,18 @@
-import { createTheme } from '@mui/material/styles';
-import { ThemeProvider } from '@mui/system';
-import { createContext, useState } from 'react';
-import { useCookies } from 'react-cookie';
-import { Outlet, Route, Routes } from 'react-router-dom';
-import styled from 'styled-components';
-import './App.css';
-import { MainLayout } from './layouts/MainLayout';
-import { GamePage } from './pages/Game/GamePage';
-import { HomePage } from './pages/home/Home';
-import getTheme, { Theme } from './style/theme'
+import { createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/system";
+import { createContext, useState } from "react";
+import { useCookies } from "react-cookie";
+import { Outlet, Route, Routes } from "react-router-dom";
+import styled from "styled-components";
+import "./App.css";
+import { MainLayout } from "./layouts/MainLayout";
+import { GamePage } from "./pages/Game/GamePage";
+import { HomePage } from "./pages/home/Home";
+import getTheme, { Theme } from "./style/theme";
 
 const darkTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
   },
 });
 
@@ -23,18 +23,20 @@ interface ThemeContextProps {
 
 export const ThemeContext = createContext<ThemeContextProps>({
   theme: getTheme(false),
-  toggleTheme: () => { },
+  toggleTheme: () => {},
 });
 
 const StyledApp = styled.div`
   text-align: center;
   height: 100%;
   background-color: ${(p) => p.theme.backgroundColor};
-`
+`;
 
 function App() {
-  const [cookies, setCookies] = useCookies()
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(cookies.isDarkMode ?? false);
+  const [cookies, setCookies] = useCookies();
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(
+    cookies.isDarkMode ?? false
+  );
 
   const toggleTheme = () => {
     setIsDarkMode((prevMode) => !prevMode);
@@ -44,21 +46,20 @@ function App() {
   const theme: Theme = getTheme(isDarkMode);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }} >
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <ThemeProvider theme={darkTheme}>
         <StyledApp>
           <Routes>
             <Route
-              element={<MainLayout>
-                <Outlet />
-              </MainLayout>}
+              element={
+                <MainLayout>
+                  <Outlet />
+                </MainLayout>
+              }
               path="/"
             >
               <Route path="/" element={<HomePage />} />
-              <Route
-                element={<GamePage />}
-                path="/games/:roomCode"
-              />
+              <Route element={<GamePage />} path="/games/:roomCode" />
             </Route>
           </Routes>
         </StyledApp>

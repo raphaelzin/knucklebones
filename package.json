@@ -6,6 +6,7 @@
   "workspaces": [
     "backend",
     "web",
+    "mobile",
     "libs/*"
   ],
   "dependencies": {

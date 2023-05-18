@@ -1,5 +1,4 @@
-import { Game } from "../game/Game";
-import { Rules } from "@knucklebones/shared-models/src/Rules";
+import { Rules, Game } from "@knucklebones/shared-models";
 
 class DefaultRules implements Rules {
   boardSize = 3;
