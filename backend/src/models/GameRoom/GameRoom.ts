@@ -8,7 +8,7 @@ import { ServerEvent } from "./GameRoomEvents";
 import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
 import { PlayerTicket } from "@knucklebones/shared-models/src/RemoteResponses";
-import { appendRoomState, getRoomState, publishNewRoomState, subscribeToRoom } from "../../redis/GameStateAdapter";
+import { appendRoomState, publishNewRoomState, subscribeToRoom } from "../../redis/GameStateAdapter";
 
 type IOSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
@@ -36,7 +36,8 @@ export class GameRoom {
 
     subscribeToRoom(this.code, message => {
       console.log(`Room ${this.code} got the message: `, JSON.stringify(message));
-      const state = JSON.parse(message["state"]);
+
+      const state = JSON.parse(message).state as GameStateSummary;
       this.handleGameStateChange(state);
 
       // Adds the state to the redis stream

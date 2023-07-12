@@ -6,7 +6,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "ts-node --esm --swc --transpileOnly --experimental-specifier-resolution=node src/app.ts",
+    "dev": "nodemon -e ts --watch 'src/**/*.ts' --exec 'ts-node --esm --swc --transpileOnly --experimental-specifier-resolution=node src/app.ts'",
     "start": "yarn build ./src/app.ts && node dist/app.cjs",
     "build": "rm -rf dist && node esbuild.config.js",
     "test": "jest --watchAll",

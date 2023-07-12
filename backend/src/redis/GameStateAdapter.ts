@@ -1,6 +1,6 @@
 import pino from "pino";
 import { addMessageToStream, getLastNFromStream } from "./RedisHelper";
-import client from "./redis";
+import client, { publishingClient } from "./redis";
 import { GameStateSummary } from "@knucklebones/shared-models";
 
 const logger = pino();
@@ -21,7 +21,7 @@ export const getRoomState = async (code: string) => {
 
 export const appendRoomState = async (code: string, state: GameStateSummary) => {
   const key = `${roomStreamPrefix}${code}`;
-  const result = addMessageToStream(key, { state: JSON.stringify(state) }, client);
+  const result = addMessageToStream(key, { state: JSON.stringify(state) }, publishingClient());
 
   return result;
 };
@@ -29,16 +29,19 @@ export const appendRoomState = async (code: string, state: GameStateSummary) => 
 export const subscribeToRoom = async (code: string, callback: (message: string) => void) => {
   const key = `${channelPrefix}:${code}`;
 
-  await client.subscribe(key, (err, message) => {
+  await client.subscribe(key, (err, _message) => {
     if (err) {
       logger.error("Error subscribing to room channel: ", err);
     }
-    callback(message as string);
+  });
+
+  client.on("message", (channel, message) => {
+    if (channel !== key) return;
+    callback(message);
   });
 };
 
 export const publishNewRoomState = async (code: string, state: GameStateSummary) => {
   const key = `${channelPrefix}:${code}`;
-  const result = await client.publish(key, JSON.stringify({ state }));
-  return result;
+  return await publishingClient().publish(key, JSON.stringify(state));
 };
