@@ -1,6 +1,5 @@
-import { createClient } from "redis";
+import Redis from "ioredis";
 
-const client = createClient({ url: "redis://localhost:6379" });
-client.connect();
+const client = new Redis("redis://localhost:6379");
 
 export default client;
