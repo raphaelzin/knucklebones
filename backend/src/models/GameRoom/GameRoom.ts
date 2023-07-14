@@ -8,7 +8,14 @@ import { ServerEvent } from "./GameRoomEvents";
 import { GameStateSummary } from "@knucklebones/shared-models/src/RemoteState";
 import { FullHouseError, InvalidPayload } from "./GameRoomErrors";
 import { PlayerTicket } from "@knucklebones/shared-models/src/RemoteResponses";
-import { appendRoomState, publishNewRoomState, subscribeToRoom } from "../../redis/GameStateAdapter";
+import {
+  appendRoomState,
+  getRoomNLastStates,
+  publishNewRoomState,
+  subscribeToRoom
+} from "../../redis/GameStateAdapter";
+import { logger } from "../../core/logger";
+import { getLastNFromStream } from "../../redis/RedisHelper";
 
 type IOSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
@@ -26,26 +33,35 @@ export class GameRoom {
 
   constructor(code: string) {
     this.code = code;
+
+    this.spectators = [];
+    this.players = [];
+  }
+
+  async setup() {
     this.controller = new GameController(DefaultRules);
+    await subscribeToRoom(this.code, state => {
+      logger.debug(`[GameRoom] Room ${this.code} got the message: ${JSON.stringify(state)}}`);
 
-    // Gets updates from the game controller
-    this.controller.gameStateCallback = state => {
-      // Publishes the state to the room channel
-      publishNewRoomState(this.code, state);
-    };
-
-    subscribeToRoom(this.code, message => {
-      console.log(`Room ${this.code} got the message: `, JSON.stringify(message));
-
-      const state = JSON.parse(message).state as GameStateSummary;
       this.handleGameStateChange(state);
 
       // Adds the state to the redis stream
       appendRoomState(this.code, state);
+
+      getRoomNLastStates(this.code, 1).then(states => {
+        logger.debug(
+          `[GameRoom] Room ${this.code} got N Last messages: ${JSON.stringify(states)}}`
+        );
+      });
     });
 
-    this.spectators = [];
-    this.players = [];
+    // Gets updates from the game controller
+    this.controller.gameStateCallback = state => {
+      logger.debug(`New state emmited by controller`);
+
+      // Publishes the state to the room channel
+      publishNewRoomState(this.code, state);
+    };
   }
 
   ticket(token: string): PlayerTicket | undefined {
@@ -148,4 +164,6 @@ export class GameRoom {
       else console.log(`client ${client.id} doesn't have a socket attached.`);
     }
   }
+
+  async setupListenersHandlers() {}
 }

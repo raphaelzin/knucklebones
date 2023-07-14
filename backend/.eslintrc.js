@@ -1,5 +1,5 @@
 module.exports = {
-  "max-len": 140,
+  "max-len": 100,
   env: {
     browser: true,
     es2021: true

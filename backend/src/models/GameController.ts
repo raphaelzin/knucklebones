@@ -1,17 +1,10 @@
-import { createBoardState, Game } from "./game/Game";
+import { createBoardState } from "./game/Game";
 import { Rules } from "@knucklebones/shared-models/src/Rules";
 import DiceTower, { DiceTowerInterface } from "./game/DiceTower";
-import {
-  GameStateSummary,
-  GameState,
-  Turn,
-} from "@knucklebones/shared-models/src/RemoteState";
+import { Game } from "@knucklebones/shared-models";
+import { GameStateSummary, GameState, Turn } from "@knucklebones/shared-models/src/RemoteState";
 
-import {
-  ColumnFullError,
-  InvalidMoveError,
-  WrongTurnError,
-} from "./GameRoom/GameRoomErrors";
+import { ColumnFullError, InvalidMoveError, WrongTurnError } from "./GameRoom/GameRoomErrors";
 
 export interface GameControllerInterface {
   gameStateSummary: GameStateSummary;
@@ -34,7 +27,7 @@ export class GameController implements GameControllerInterface {
     this.game = { rules: rules, players: [] };
     this.gameStateSummary = this.createState({
       kind: "waiting-player",
-      playersPresent: [],
+      playersPresent: []
     });
   }
 
@@ -49,13 +42,13 @@ export class GameController implements GameControllerInterface {
     this.game.players.push({
       identifier: identifier,
       nickname: nickname,
-      board: board,
+      board: board
     });
 
     if (this.gameStateSummary.state.kind === "waiting-player") {
       this.gameStateSummary.state.playersPresent.push({
         nickname,
-        id: identifier,
+        id: identifier
       });
       this.gameStateCallback(this.gameStateSummary);
     }
@@ -74,16 +67,15 @@ export class GameController implements GameControllerInterface {
     if (this.gameStateSummary.state.playerId != playerId) throw WrongTurnError;
 
     const die = this.gameStateSummary.state.die;
-    const player = this.game.players.filter((p) => p.identifier == playerId)[0];
+    const player = this.game.players.filter(p => p.identifier == playerId)[0];
 
     // If the column is already full, throw error.
-    if (player.board[col].length >= this.game.rules.boardSize || col < 0)
-      throw ColumnFullError;
+    if (player.board[col].length >= this.game.rules.boardSize || col < 0) throw ColumnFullError;
 
     for (const player of this.game.players) {
       if (player.identifier != playerId) {
         // Removes instances of die in that column of other players
-        player.board[col] = player.board[col].filter((x) => x != die);
+        player.board[col] = player.board[col].filter(x => x != die);
       } else {
         // Adds die to current player
         player.board[col].push(die);
@@ -119,7 +111,7 @@ export class GameController implements GameControllerInterface {
     } else {
       this.gameStateSummary = this.createState({
         kind: "win",
-        winnerId,
+        winnerId
       });
     }
 
@@ -129,7 +121,7 @@ export class GameController implements GameControllerInterface {
   // Helper functions
 
   nextPlayerAfter(playerId: string): string {
-    const ids = this.game.players.map((p) => p.identifier);
+    const ids = this.game.players.map(p => p.identifier);
     const index = ids.indexOf(playerId);
     const id = ids[(index + 1) % ids.length];
     return id;
@@ -139,14 +131,14 @@ export class GameController implements GameControllerInterface {
     return {
       kind: "turn",
       playerId: this.nextPlayerAfter(previousPlayer),
-      die: this.diceTower.throwDice(1, this.game.rules.dieSideCount),
+      die: this.diceTower.throwDice(1, this.game.rules.dieSideCount)
     };
   }
 
   createState(state: GameState): GameStateSummary {
     return {
       boardState: createBoardState(this.game),
-      state: state,
+      state: state
     };
   }
 }

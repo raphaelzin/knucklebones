@@ -4,11 +4,17 @@ const client = new Redis("redis://localhost:6379");
 
 export default client;
 
-let cachedPublishingClient: Redis = undefined;
-export const publishingClient = () => {
-  if (cachedPublishingClient) return cachedPublishingClient;
+let cachedPublisherClient: Redis = undefined;
+let cachedSubscriberClient: Redis = undefined;
 
-  const client = new Redis("redis://localhost:6379");
-  cachedPublishingClient = client;
-  return client;
+export const getSubscriberClient = () => {
+  if (cachedSubscriberClient) return cachedSubscriberClient;
+  cachedSubscriberClient = client.duplicate();
+  return cachedSubscriberClient;
+};
+
+export const getPublisherClient = () => {
+  if (cachedPublisherClient) return cachedPublisherClient;
+  cachedPublisherClient = client.duplicate();
+  return cachedPublisherClient;
 };

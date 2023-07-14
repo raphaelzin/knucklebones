@@ -5,10 +5,9 @@ import { GameRoom } from "../models/GameRoom/GameRoom";
 import { PlayerTicket, RoomJoinResponse, RoomSpectateResponse } from "@knucklebones/shared-models/src/RemoteResponses";
 import { InvalidPayload } from "../models/GameRoom/GameRoomErrors";
 import Joi from "joi";
-import { pino } from "pino";
+import { logger } from "../core/logger";
 import { env } from "../environment";
 
-const logger = pino();
 export const router = express.Router();
 
 router.post("/create-game", async (req: Request, res: Response) => {
