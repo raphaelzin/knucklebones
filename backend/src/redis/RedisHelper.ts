@@ -14,7 +14,7 @@ export const addMessageToStream = async (
   message: Record<string, string>,
   client: Redis
 ) => {
-  const result = await client.xadd(stream, "*", "state", JSON.stringify(message) , () => {
+  const result = await client.xadd(stream, "*", "state", JSON.stringify(message), () => {
     return;
   });
   return result;

@@ -62,8 +62,5 @@ export const subscribeToRoom = async (
 
 export const publishNewRoomState = async (code: string, state: GameStateSummary) => {
   const key = `${channelPrefix}:${code}`;
-  // logger.debug(
-  //   `[GameStateAdapter] Publishing new state to channel ${key}: "${JSON.stringify(state)}"`
-  // );
   return await getPublisherClient().publish(key, JSON.stringify(state));
 };

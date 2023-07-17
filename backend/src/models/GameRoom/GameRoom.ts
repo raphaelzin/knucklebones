@@ -15,7 +15,6 @@ import {
   subscribeToRoom
 } from "../../redis/GameStateAdapter";
 import { logger } from "../../core/logger";
-import { getLastNFromStream } from "../../redis/RedisHelper";
 
 type IOSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
@@ -40,19 +39,14 @@ export class GameRoom {
 
   async setup() {
     this.controller = new GameController(DefaultRules);
-    await subscribeToRoom(this.code, state => {
+    await subscribeToRoom(this.code, async state => {
       logger.debug(`[GameRoom] Room ${this.code} got the message: ${JSON.stringify(state)}}`);
 
-      this.handleGameStateChange(state);
-
       // Adds the state to the redis stream
-      appendRoomState(this.code, state);
-
-      getRoomNLastStates(this.code, 1).then(states => {
-        logger.debug(
-          `[GameRoom] Room ${this.code} got N Last messages: ${JSON.stringify(states)}}`
-        );
-      });
+      await appendRoomState(this.code, state);
+      this.handleGameStateChange(state);
+      const states = await getRoomNLastStates(this.code, 1);
+      logger.debug(`[GameRoom] Room ${this.code} got N Last messages: ${JSON.stringify(states)}}`);
     });
 
     // Gets updates from the game controller
@@ -164,6 +158,4 @@ export class GameRoom {
       else console.log(`client ${client.id} doesn't have a socket attached.`);
     }
   }
-
-  async setupListenersHandlers() {}
 }
